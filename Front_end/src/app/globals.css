@@ -27,7 +27,7 @@ body {
 }
 
 .alarm-warning {
-  @apply bg-warning/10 border-l-4 border-warning text-warning-800 p-4 rounded;
+  @apply bg-warning/10 border-l-4 border-warning text-amber-800 p-4 rounded;
 }
 
 .alarm-critical {
