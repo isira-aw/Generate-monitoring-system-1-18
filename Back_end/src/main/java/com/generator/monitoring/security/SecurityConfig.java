@@ -64,14 +64,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/devices").permitAll()
                         .requestMatchers("/api/devices/*/dashboard").permitAll()
                         .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // For H2 console
-        http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
 
         return http.build();
     }
