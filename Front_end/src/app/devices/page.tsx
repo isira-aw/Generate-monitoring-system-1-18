@@ -146,31 +146,51 @@ export default function DevicesPage() {
     setSuccessMessage('');
   };
 
-  const handleDetachDevice = async (deviceId: number) => {
-    if (!confirm('Are you sure you want to detach this device? You will need the device password to re-attach it.')) {
+  const handleDetachDevice = async (deviceId: number, deviceName: string) => {
+    const confirmed = confirm(
+      `Remove "${deviceName}" from your list?\n\n` +
+      `This will remove the device from YOUR account only.\n` +
+      `• The device will no longer appear in your device list\n` +
+      `• Other users can still access this device\n` +
+      `• You can re-attach it anytime using the device password\n\n` +
+      `Do you want to continue?`
+    );
+
+    if (!confirmed) {
       return;
     }
 
     try {
       await deviceApi.detachDevice(deviceId);
-      setSuccessMessage('Device detached successfully');
+      setSuccessMessage(`"${deviceName}" removed from your list successfully`);
       await loadDevices();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err: any) {
       const errorMessage = err.response?.data?.message;
-      setError(errorMessage || 'Failed to detach device');
+      setError(errorMessage || 'Failed to remove device from your list');
       setTimeout(() => setError(''), 3000);
     }
   };
 
-  const handleDeleteDevice = async (deviceId: string) => {
-    if (!confirm('Are you sure you want to DELETE this device? This action cannot be undone and will remove the device for ALL users!')) {
+  const handleDeleteDevice = async (deviceId: string, deviceName: string) => {
+    const confirmed = confirm(
+      `⚠️ PERMANENTLY DELETE "${deviceName}"?\n\n` +
+      `WARNING: This action CANNOT be undone!\n\n` +
+      `This will:\n` +
+      `• Delete the device from the entire system\n` +
+      `• Remove it from ALL users' accounts\n` +
+      `• Delete all device data, settings, and history\n\n` +
+      `If you just want to remove it from YOUR list, use "Remove from My List" instead.\n\n` +
+      `Are you absolutely sure you want to DELETE this device?`
+    );
+
+    if (!confirmed) {
       return;
     }
 
     try {
       await deviceApi.deleteDevice(deviceId);
-      setSuccessMessage('Device deleted successfully');
+      setSuccessMessage(`"${deviceName}" has been permanently deleted`);
       await loadDevices();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err: any) {
@@ -237,7 +257,7 @@ export default function DevicesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-4xl font-bold">My Devices</h1>
         <button
           onClick={() => setShowAddModal(true)}
@@ -245,6 +265,20 @@ export default function DevicesPage() {
         >
           + Add Device
         </button>
+      </div>
+
+      {/* Info Box */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="flex items-start">
+          <span className="text-2xl mr-3">ℹ️</span>
+          <div>
+            <h3 className="font-semibold text-blue-900 mb-2">Device Management Options:</h3>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li><strong>🗑️ Remove:</strong> Removes the device from YOUR list only. Other users can still access it. You can re-attach it anytime with the password.</li>
+              <li><strong>⚠️ Delete Permanently:</strong> Deletes the device from the ENTIRE SYSTEM for ALL users. This cannot be undone!</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       {error && (
@@ -261,12 +295,21 @@ export default function DevicesPage() {
 
       {devices.length === 0 ? (
         <div className="card text-center">
-          <p className="text-gray-600 mb-4">
-            No devices attached to your account yet.
+          <div className="text-6xl mb-4">📱</div>
+          <p className="text-gray-600 mb-2 text-lg font-semibold">
+            No devices in your list yet
           </p>
-          <p className="text-sm text-gray-500">
-            Click the "Add Device" button above to attach a device using its ID and password.
+          <p className="text-sm text-gray-500 mb-4">
+            Click the "+ Add Device" button above to attach a device to your account.
           </p>
+          <div className="bg-gray-50 rounded p-4 text-left text-sm">
+            <p className="font-semibold mb-2">💡 Quick Tips:</p>
+            <ul className="space-y-1 text-gray-600">
+              <li>• You need the Device ID and Password to attach a device</li>
+              <li>• The same device can be shared with multiple users</li>
+              <li>• Use "Remove" to take devices off your list anytime</li>
+            </ul>
+          </div>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -302,37 +345,40 @@ export default function DevicesPage() {
                 <div className="flex gap-2">
                   <Link
                     href={`/device/${device.deviceId}/dashboard`}
-                    className="btn btn-primary flex-1 text-center"
+                    className="btn btn-primary flex-1 text-center text-sm"
                   >
-                    Dashboard
+                    📊 Dashboard
                   </Link>
                   <Link
                     href={`/device/${device.deviceId}/settings`}
-                    className="btn btn-secondary flex-1 text-center"
+                    className="btn btn-secondary flex-1 text-center text-sm"
                   >
-                    Settings
+                    ⚙️ Settings
                   </Link>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEditDevice(device)}
-                    className="btn bg-blue-500 hover:bg-blue-600 text-white flex-1"
+                    className="btn bg-blue-500 hover:bg-blue-600 text-white flex-1 text-sm"
+                    title="Edit device name and location"
                   >
-                    Edit
+                    ✏️ Edit
                   </button>
                   <button
-                    onClick={() => handleDetachDevice(device.id)}
-                    className="btn bg-yellow-500 hover:bg-yellow-600 text-white flex-1"
+                    onClick={() => handleDetachDevice(device.id, device.name)}
+                    className="btn bg-orange-500 hover:bg-orange-600 text-white flex-1 text-sm"
+                    title="Remove this device from your list (you can re-attach it later)"
                   >
-                    Detach
-                  </button>
-                  <button
-                    onClick={() => handleDeleteDevice(device.deviceId)}
-                    className="btn bg-red-500 hover:bg-red-600 text-white flex-1"
-                  >
-                    Delete
+                    🗑️ Remove
                   </button>
                 </div>
+                <button
+                  onClick={() => handleDeleteDevice(device.deviceId, device.name)}
+                  className="btn bg-red-600 hover:bg-red-700 text-white w-full text-sm font-bold"
+                  title="⚠️ PERMANENTLY delete this device from the system (affects all users)"
+                >
+                  ⚠️ Delete Permanently
+                </button>
               </div>
             </div>
           ))}
