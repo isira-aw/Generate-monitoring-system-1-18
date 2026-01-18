@@ -133,7 +133,7 @@ public class DeviceController {
 
     @PostMapping("/{deviceId}/request-verification")
     public ResponseEntity<?> requestDeviceSettingsVerification(
-            @PathVariable Long deviceId,
+            @PathVariable String deviceId,
             Authentication authentication) {
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -149,7 +149,7 @@ public class DeviceController {
 
     @PostMapping("/{deviceId}/verify-code")
     public ResponseEntity<?> verifyDeviceSettingsCode(
-            @PathVariable Long deviceId,
+            @PathVariable String deviceId,
             @RequestBody VerifyDeviceCodeRequest request,
             Authentication authentication) {
 
@@ -171,7 +171,7 @@ public class DeviceController {
 
     @PutMapping("/{deviceId}/password")
     public ResponseEntity<?> updateDevicePassword(
-            @PathVariable Long deviceId,
+            @PathVariable String deviceId,
             @RequestBody UpdateDevicePasswordRequest request,
             Authentication authentication) {
 
@@ -188,7 +188,7 @@ public class DeviceController {
 
     @DeleteMapping("/{deviceId}/detach")
     public ResponseEntity<?> detachDevice(
-            @PathVariable Long deviceId,
+            @PathVariable String deviceId,
             Authentication authentication) {
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -220,7 +220,7 @@ public class DeviceController {
 
     @PutMapping("/{deviceId}/info")
     public ResponseEntity<DeviceDto> updateDeviceInfo(
-            @PathVariable Long deviceId,
+            @PathVariable String deviceId,
             @RequestBody Map<String, String> deviceData,
             Authentication authentication) {
 

@@ -28,7 +28,7 @@ public class VerificationService {
     private final EmailService emailService;
 
     @Transactional
-    public void requestDeviceSettingsVerification(String userEmail, Long deviceId) {
+    public void requestDeviceSettingsVerification(String userEmail, String deviceId) {
         logger.info("Requesting device settings verification for user: {} and device ID: {}", userEmail, deviceId);
 
         // Input validation
@@ -37,12 +37,13 @@ public class VerificationService {
             throw new InvalidInputException("User email cannot be empty");
         }
 
-        if (deviceId == null) {
-            logger.error("Verification request failed: Device ID is null");
-            throw new InvalidInputException("Device ID cannot be null");
+        if (deviceId == null || deviceId.trim().isEmpty()) {
+            logger.error("Verification request failed: Device ID is empty");
+            throw new InvalidInputException("Device ID cannot be empty");
         }
 
         final String finalUserEmail = userEmail.trim();
+        final String finalDeviceId = deviceId.trim();
 
         // Find user
         User user = userRepository.findByEmail(finalUserEmail)
@@ -51,10 +52,10 @@ public class VerificationService {
                     return new UserNotFoundException("User not found");
                 });
 
-        // Find device
-        Device device = deviceRepository.findById(deviceId)
+        // Find device by deviceId (String)
+        Device device = deviceRepository.findByDeviceId(finalDeviceId)
                 .orElseThrow(() -> {
-                    logger.error("Device not found with ID: {}", deviceId);
+                    logger.error("Device not found with ID: {}", finalDeviceId);
                     return new DeviceNotFoundException("Device not found");
                 });
 
@@ -63,19 +64,19 @@ public class VerificationService {
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
         if (!hasAccess) {
-            logger.error("User {} does not have access to device {}", finalUserEmail, deviceId);
+            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
             throw new DeviceAccessDeniedException("You don't have access to this device");
         }
 
         // Generate 4-digit code
         String code = String.format("%04d", new Random().nextInt(10000));
 
-        // Create verification code
+        // Create verification code (store database ID)
         VerificationCode verificationCode = new VerificationCode();
         verificationCode.setCode(code);
         verificationCode.setEmail(finalUserEmail);
         verificationCode.setType(VerificationCode.VerificationType.DEVICE_SETTINGS);
-        verificationCode.setDeviceId(deviceId);
+        verificationCode.setDeviceId(device.getId()); // Store database ID (Long)
         verificationCode.setExpiresAt(LocalDateTime.now().plusMinutes(10));
         verificationCode.setUsed(false);
 
@@ -88,7 +89,7 @@ public class VerificationService {
     }
 
     @Transactional
-    public boolean verifyDeviceSettingsCode(String userEmail, Long deviceId, String code) {
+    public boolean verifyDeviceSettingsCode(String userEmail, String deviceId, String code) {
         logger.info("Verifying device settings code for user: {} and device ID: {}", userEmail, deviceId);
 
         // Input validation
@@ -97,15 +98,24 @@ public class VerificationService {
             throw new InvalidInputException("User email cannot be empty");
         }
 
-        if (deviceId == null) {
-            logger.error("Verification failed: Device ID is null");
-            throw new InvalidInputException("Device ID cannot be null");
+        if (deviceId == null || deviceId.trim().isEmpty()) {
+            logger.error("Verification failed: Device ID is empty");
+            throw new InvalidInputException("Device ID cannot be empty");
         }
 
         if (code == null || code.trim().isEmpty()) {
             logger.error("Verification failed: Verification code is empty");
             throw new InvalidInputException("Verification code cannot be empty");
         }
+
+        final String finalDeviceId = deviceId.trim();
+
+        // Find device by deviceId (String) to get database ID
+        Device device = deviceRepository.findByDeviceId(finalDeviceId)
+                .orElseThrow(() -> {
+                    logger.error("Device not found with ID: {}", finalDeviceId);
+                    return new DeviceNotFoundException("Device not found");
+                });
 
         VerificationCode verificationCode = verificationCodeRepository
                 .findByCodeAndEmailAndTypeAndUsedFalseAndExpiresAtAfter(
@@ -121,7 +131,8 @@ public class VerificationService {
             return false;
         }
 
-        if (!verificationCode.getDeviceId().equals(deviceId)) {
+        // Compare database ID (Long)
+        if (!verificationCode.getDeviceId().equals(device.getId())) {
             logger.warn("Device ID mismatch in verification code for user: {}", userEmail);
             return false;
         }
@@ -135,7 +146,7 @@ public class VerificationService {
     }
 
     @Transactional
-    public void updateDevicePassword(String userEmail, Long deviceId, String newPassword) {
+    public void updateDevicePassword(String userEmail, String deviceId, String newPassword) {
         logger.info("Updating device password for device ID: {} by user: {}", deviceId, userEmail);
 
         // Input validation
@@ -144,9 +155,9 @@ public class VerificationService {
             throw new InvalidInputException("User email cannot be empty");
         }
 
-        if (deviceId == null) {
-            logger.error("Update password failed: Device ID is null");
-            throw new InvalidInputException("Device ID cannot be null");
+        if (deviceId == null || deviceId.trim().isEmpty()) {
+            logger.error("Update password failed: Device ID is empty");
+            throw new InvalidInputException("Device ID cannot be empty");
         }
 
         if (newPassword == null || newPassword.trim().isEmpty()) {
@@ -155,6 +166,7 @@ public class VerificationService {
         }
 
         final String finalUserEmail = userEmail.trim();
+        final String finalDeviceId = deviceId.trim();
 
         // Find user
         User user = userRepository.findByEmail(finalUserEmail)
@@ -163,10 +175,10 @@ public class VerificationService {
                     return new UserNotFoundException("User not found");
                 });
 
-        // Find device
-        Device device = deviceRepository.findById(deviceId)
+        // Find device by deviceId (String)
+        Device device = deviceRepository.findByDeviceId(finalDeviceId)
                 .orElseThrow(() -> {
-                    logger.error("Device not found with ID: {}", deviceId);
+                    logger.error("Device not found with ID: {}", finalDeviceId);
                     return new DeviceNotFoundException("Device not found");
                 });
 
@@ -175,7 +187,7 @@ public class VerificationService {
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
         if (!hasAccess) {
-            logger.error("User {} does not have access to device {}", finalUserEmail, deviceId);
+            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
             throw new DeviceAccessDeniedException("You don't have access to this device");
         }
 
@@ -183,6 +195,6 @@ public class VerificationService {
         device.setDevicePassword(newPassword.trim());
         deviceRepository.save(device);
 
-        logger.info("Device password updated successfully for device ID: {}", deviceId);
+        logger.info("Device password updated successfully for device ID: {}", finalDeviceId);
     }
 }

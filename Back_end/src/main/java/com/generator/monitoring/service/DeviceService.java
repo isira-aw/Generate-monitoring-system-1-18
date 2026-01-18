@@ -268,21 +268,22 @@ public class DeviceService {
     }
 
     @Transactional
-    public void detachDeviceFromUser(Long deviceId, String userEmail) {
+    public void detachDeviceFromUser(String deviceId, String userEmail) {
         logger.info("Detaching device ID {} from user: {}", deviceId, userEmail);
 
-        if (deviceId == null) {
-            throw new InvalidInputException("Device ID cannot be null");
+        if (deviceId == null || deviceId.trim().isEmpty()) {
+            throw new InvalidInputException("Device ID cannot be empty");
         }
 
         if (userEmail == null || userEmail.trim().isEmpty()) {
             throw new InvalidInputException("User email cannot be empty");
         }
 
+        final String finalDeviceId = deviceId.trim();
         final String finalUserEmail = userEmail.trim();
 
-        Device device = deviceRepository.findById(deviceId)
-                .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + deviceId));
+        Device device = deviceRepository.findByDeviceId(finalDeviceId)
+                .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + finalDeviceId));
 
         User user = userRepository.findByEmail(finalUserEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + finalUserEmail));
@@ -292,7 +293,7 @@ public class DeviceService {
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
         if (!isAttached) {
-            logger.warn("User {} is not attached to device {}", finalUserEmail, deviceId);
+            logger.warn("User {} is not attached to device {}", finalUserEmail, finalDeviceId);
             throw new InvalidInputException("Device is not attached to your account");
         }
 
@@ -300,7 +301,7 @@ public class DeviceService {
         device.getUsers().removeIf(u -> u.getId().equals(user.getId()));
         deviceRepository.save(device);
 
-        logger.info("Successfully detached device {} from user {}", deviceId, finalUserEmail);
+        logger.info("Successfully detached device {} from user {}", finalDeviceId, finalUserEmail);
     }
 
     @Transactional
@@ -340,21 +341,22 @@ public class DeviceService {
     }
 
     @Transactional
-    public DeviceDto updateDeviceInfo(Long deviceId, String name, String location, String userEmail) {
+    public DeviceDto updateDeviceInfo(String deviceId, String name, String location, String userEmail) {
         logger.info("Updating device info for device ID: {} by user: {}", deviceId, userEmail);
 
-        if (deviceId == null) {
-            throw new InvalidInputException("Device ID cannot be null");
+        if (deviceId == null || deviceId.trim().isEmpty()) {
+            throw new InvalidInputException("Device ID cannot be empty");
         }
 
         if (userEmail == null || userEmail.trim().isEmpty()) {
             throw new InvalidInputException("User email cannot be empty");
         }
 
+        final String finalDeviceId = deviceId.trim();
         final String finalUserEmail = userEmail.trim();
 
-        Device device = deviceRepository.findById(deviceId)
-                .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + deviceId));
+        Device device = deviceRepository.findByDeviceId(finalDeviceId)
+                .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + finalDeviceId));
 
         User user = userRepository.findByEmail(finalUserEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + finalUserEmail));
@@ -364,7 +366,7 @@ public class DeviceService {
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
         if (!hasAccess) {
-            logger.error("User {} does not have access to device {}", finalUserEmail, deviceId);
+            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
             throw new DeviceAccessDeniedException("You don't have access to edit this device");
         }
 
@@ -378,7 +380,7 @@ public class DeviceService {
 
         Device saved = deviceRepository.save(device);
 
-        logger.info("Successfully updated device info for device ID: {}", deviceId);
+        logger.info("Successfully updated device info for device ID: {}", finalDeviceId);
 
         return mapToDto(saved);
     }
