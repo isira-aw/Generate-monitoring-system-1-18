@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { deviceApi } from '@/lib/api';
 
@@ -196,16 +195,7 @@ export default function SettingsPage() {
 
             {verificationError && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <p className="font-semibold mb-2">{verificationError}</p>
-                {verificationError.includes("don't have access") && (
-                  <p className="text-sm mt-2">
-                    This device hasn't been attached to your account yet. Please go to the{' '}
-                    <Link href="/devices" className="underline font-semibold">
-                      Devices page
-                    </Link>{' '}
-                    and click "Add Device" to attach it first using the device ID and password.
-                  </p>
-                )}
+                {verificationError}
               </div>
             )}
 

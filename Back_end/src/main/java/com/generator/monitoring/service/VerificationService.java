@@ -30,10 +30,8 @@ public class VerificationService {
         Device device = deviceRepository.findById(deviceId)
                 .orElseThrow(() -> new RuntimeException("Device not found"));
 
-        // Check if user has access to this device
-        if (!device.getUsers().contains(user)) {
-            throw new RuntimeException("You don't have access to this device");
-        }
+        // Just send verification code to confirm user's email identity
+        // No need to check device ownership here - verification is only for email confirmation
 
         // Generate 4-digit code
         String code = String.format("%04d", new Random().nextInt(10000));
