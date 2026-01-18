@@ -28,6 +28,7 @@ export default function DevicesPage() {
   });
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -61,39 +62,74 @@ export default function DevicesPage() {
   const handleAddDevice = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
+    setSuccessMessage('');
 
     // Validation
-    if (!formData.deviceId.trim()) {
+    const deviceId = formData.deviceId.trim();
+    const devicePassword = formData.devicePassword.trim();
+
+    if (!deviceId) {
       setFormError('Device ID is required');
       return;
     }
-    if (!formData.devicePassword.trim()) {
+
+    if (!devicePassword) {
       setFormError('Device password is required');
+      return;
+    }
+
+    if (deviceId.length < 3) {
+      setFormError('Device ID must be at least 3 characters');
+      return;
+    }
+
+    if (devicePassword.length < 4) {
+      setFormError('Device password must be at least 4 characters');
       return;
     }
 
     setSubmitting(true);
     try {
       await deviceApi.attachDevice({
-        deviceId: formData.deviceId.trim(),
-        devicePassword: formData.devicePassword.trim(),
+        deviceId,
+        devicePassword,
       });
 
-      // Reset form and close modal
+      // Reset form
       setFormData({ deviceId: '', devicePassword: '' });
-      setShowAddModal(false);
+
+      // Show success message
+      setSuccessMessage('Device attached successfully!');
 
       // Reload devices
       await loadDevices();
+
+      // Close modal after a short delay
+      setTimeout(() => {
+        setShowAddModal(false);
+        setSuccessMessage('');
+      }, 1500);
+
     } catch (err: any) {
-      if (err.response?.status === 400) {
-        setFormError(err.response?.data?.message || 'Invalid device credentials or device already attached');
-      } else if (err.response?.status === 401) {
-        router.push('/login');
+      console.error('Error attaching device:', err);
+
+      // Handle different error types from backend
+      const errorMessage = err.response?.data?.message;
+      const errorCode = err.response?.data?.error;
+
+      if (err.response?.status === 401 || errorCode === 'INVALID_PASSWORD') {
+        setFormError(errorMessage || 'Invalid device password');
+      } else if (err.response?.status === 404 || errorCode === 'DEVICE_NOT_FOUND') {
+        setFormError(errorMessage || 'Device not found. Please check the Device ID.');
+      } else if (err.response?.status === 409 || errorCode === 'DEVICE_ALREADY_ATTACHED') {
+        setFormError(errorMessage || 'This device is already attached to your account');
+      } else if (err.response?.status === 400 || errorCode === 'INVALID_INPUT') {
+        setFormError(errorMessage || 'Invalid input. Please check your entries.');
+      } else if (err.response?.status === 403 || errorCode === 'ACCESS_DENIED') {
+        setFormError(errorMessage || 'You do not have permission to attach this device');
       } else {
-        setFormError('Failed to add device. Please try again.');
+        setFormError(errorMessage || 'Failed to attach device. Please try again.');
       }
-      console.error(err);
     } finally {
       setSubmitting(false);
     }
@@ -103,6 +139,7 @@ export default function DevicesPage() {
     setShowAddModal(false);
     setFormData({ deviceId: '', devicePassword: '' });
     setFormError('');
+    setSuccessMessage('');
   };
 
   if (authLoading || loading) {
@@ -132,6 +169,12 @@ export default function DevicesPage() {
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
+        </div>
+      )}
+
+      {successMessage && !showAddModal && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {successMessage}
         </div>
       )}
 
@@ -212,6 +255,12 @@ export default function DevicesPage() {
               {formError && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                   {formError}
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                  {successMessage}
                 </div>
               )}
 

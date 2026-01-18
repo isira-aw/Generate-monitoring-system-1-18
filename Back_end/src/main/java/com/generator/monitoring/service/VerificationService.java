@@ -3,10 +3,13 @@ package com.generator.monitoring.service;
 import com.generator.monitoring.entity.Device;
 import com.generator.monitoring.entity.User;
 import com.generator.monitoring.entity.VerificationCode;
+import com.generator.monitoring.exception.*;
 import com.generator.monitoring.repository.DeviceRepository;
 import com.generator.monitoring.repository.UserRepository;
 import com.generator.monitoring.repository.VerificationCodeRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,8 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class VerificationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(VerificationService.class);
+
     private final VerificationCodeRepository verificationCodeRepository;
     private final UserRepository userRepository;
     private final DeviceRepository deviceRepository;
@@ -24,14 +29,41 @@ public class VerificationService {
 
     @Transactional
     public void requestDeviceSettingsVerification(String userEmail, Long deviceId) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        logger.info("Requesting device settings verification for user: {} and device ID: {}", userEmail, deviceId);
 
+        // Input validation
+        if (userEmail == null || userEmail.trim().isEmpty()) {
+            logger.error("Verification request failed: User email is empty");
+            throw new InvalidInputException("User email cannot be empty");
+        }
+
+        if (deviceId == null) {
+            logger.error("Verification request failed: Device ID is null");
+            throw new InvalidInputException("Device ID cannot be null");
+        }
+
+        // Find user
+        User user = userRepository.findByEmail(userEmail.trim())
+                .orElseThrow(() -> {
+                    logger.error("User not found: {}", userEmail);
+                    return new UserNotFoundException("User not found");
+                });
+
+        // Find device
         Device device = deviceRepository.findById(deviceId)
-                .orElseThrow(() -> new RuntimeException("Device not found"));
+                .orElseThrow(() -> {
+                    logger.error("Device not found with ID: {}", deviceId);
+                    return new DeviceNotFoundException("Device not found");
+                });
 
-        // Just send verification code to confirm user's email identity
-        // No need to check device ownership here - verification is only for email confirmation
+        // Check if user has access to this device
+        boolean hasAccess = device.getUsers().stream()
+                .anyMatch(u -> u.getId().equals(user.getId()));
+
+        if (!hasAccess) {
+            logger.error("User {} does not have access to device {}", userEmail, deviceId);
+            throw new DeviceAccessDeniedException("You don't have access to this device");
+        }
 
         // Generate 4-digit code
         String code = String.format("%04d", new Random().nextInt(10000));
@@ -39,7 +71,7 @@ public class VerificationService {
         // Create verification code
         VerificationCode verificationCode = new VerificationCode();
         verificationCode.setCode(code);
-        verificationCode.setEmail(userEmail);
+        verificationCode.setEmail(userEmail.trim());
         verificationCode.setType(VerificationCode.VerificationType.DEVICE_SETTINGS);
         verificationCode.setDeviceId(deviceId);
         verificationCode.setExpiresAt(LocalDateTime.now().plusMinutes(10));
@@ -49,24 +81,46 @@ public class VerificationService {
 
         // Send email
         emailService.sendDeviceSettingsVerificationEmail(userEmail, code);
+
+        logger.info("Verification code sent successfully to user: {}", userEmail);
     }
 
     @Transactional
     public boolean verifyDeviceSettingsCode(String userEmail, Long deviceId, String code) {
+        logger.info("Verifying device settings code for user: {} and device ID: {}", userEmail, deviceId);
+
+        // Input validation
+        if (userEmail == null || userEmail.trim().isEmpty()) {
+            logger.error("Verification failed: User email is empty");
+            throw new InvalidInputException("User email cannot be empty");
+        }
+
+        if (deviceId == null) {
+            logger.error("Verification failed: Device ID is null");
+            throw new InvalidInputException("Device ID cannot be null");
+        }
+
+        if (code == null || code.trim().isEmpty()) {
+            logger.error("Verification failed: Verification code is empty");
+            throw new InvalidInputException("Verification code cannot be empty");
+        }
+
         VerificationCode verificationCode = verificationCodeRepository
                 .findByCodeAndEmailAndTypeAndUsedFalseAndExpiresAtAfter(
-                        code,
-                        userEmail,
+                        code.trim(),
+                        userEmail.trim(),
                         VerificationCode.VerificationType.DEVICE_SETTINGS,
                         LocalDateTime.now()
                 )
                 .orElse(null);
 
         if (verificationCode == null) {
+            logger.warn("Invalid or expired verification code for user: {}", userEmail);
             return false;
         }
 
         if (!verificationCode.getDeviceId().equals(deviceId)) {
+            logger.warn("Device ID mismatch in verification code for user: {}", userEmail);
             return false;
         }
 
@@ -74,26 +128,57 @@ public class VerificationService {
         verificationCode.setUsed(true);
         verificationCodeRepository.save(verificationCode);
 
+        logger.info("Verification code validated successfully for user: {}", userEmail);
         return true;
     }
 
     @Transactional
     public void updateDevicePassword(String userEmail, Long deviceId, String newPassword) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        logger.info("Updating device password for device ID: {} by user: {}", deviceId, userEmail);
 
+        // Input validation
+        if (userEmail == null || userEmail.trim().isEmpty()) {
+            logger.error("Update password failed: User email is empty");
+            throw new InvalidInputException("User email cannot be empty");
+        }
+
+        if (deviceId == null) {
+            logger.error("Update password failed: Device ID is null");
+            throw new InvalidInputException("Device ID cannot be null");
+        }
+
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            logger.error("Update password failed: New password is empty");
+            throw new InvalidInputException("New password cannot be empty");
+        }
+
+        // Find user
+        User user = userRepository.findByEmail(userEmail.trim())
+                .orElseThrow(() -> {
+                    logger.error("User not found: {}", userEmail);
+                    return new UserNotFoundException("User not found");
+                });
+
+        // Find device
         Device device = deviceRepository.findById(deviceId)
-                .orElseThrow(() -> new RuntimeException("Device not found"));
+                .orElseThrow(() -> {
+                    logger.error("Device not found with ID: {}", deviceId);
+                    return new DeviceNotFoundException("Device not found");
+                });
 
-        // Check if user has access to this device by comparing user IDs
+        // Check if user has access to this device
         boolean hasAccess = device.getUsers().stream()
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
         if (!hasAccess) {
-            throw new RuntimeException("You don't have access to this device");
+            logger.error("User {} does not have access to device {}", userEmail, deviceId);
+            throw new DeviceAccessDeniedException("You don't have access to this device");
         }
 
-        device.setDevicePassword(newPassword);
+        // Update password
+        device.setDevicePassword(newPassword.trim());
         deviceRepository.save(device);
+
+        logger.info("Device password updated successfully for device ID: {}", deviceId);
     }
 }
