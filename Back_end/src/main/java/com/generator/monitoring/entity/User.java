@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -28,6 +30,9 @@ public class User {
 
     @Column(nullable = false)
     private String mobileNumber;
+
+    @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY)
+    private Set<Device> devices = new HashSet<>();
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

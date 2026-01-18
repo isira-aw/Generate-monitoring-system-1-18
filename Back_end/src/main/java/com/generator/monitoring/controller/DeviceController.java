@@ -1,6 +1,8 @@
 package com.generator.monitoring.controller;
 
+import com.generator.monitoring.dto.AddDeviceRequest;
 import com.generator.monitoring.dto.DeviceDto;
+import com.generator.monitoring.dto.RegisterDeviceRequest;
 import com.generator.monitoring.dto.ThresholdDto;
 import com.generator.monitoring.entity.Device;
 import com.generator.monitoring.enums.ThresholdParameter;
@@ -26,8 +28,52 @@ public class DeviceController {
     private ThresholdService thresholdService;
 
     @GetMapping
-    public ResponseEntity<List<DeviceDto>> getAllDevices() {
-        return ResponseEntity.ok(deviceService.getAllDevices());
+    public ResponseEntity<List<DeviceDto>> getAllDevices(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String userEmail = authentication.getName();
+        return ResponseEntity.ok(deviceService.getUserDevices(userEmail));
+    }
+
+    @PostMapping("/attach")
+    public ResponseEntity<DeviceDto> attachDevice(
+            @RequestBody AddDeviceRequest request,
+            Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            String userEmail = authentication.getName();
+            DeviceDto device = deviceService.attachDeviceToUser(
+                    request.getDeviceId(),
+                    request.getDevicePassword(),
+                    userEmail
+            );
+            return ResponseEntity.ok(device);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<DeviceDto> registerDevice(
+            @RequestBody RegisterDeviceRequest request) {
+
+        try {
+            DeviceDto device = deviceService.registerDevice(
+                    request.getDeviceId(),
+                    request.getDevicePassword(),
+                    request.getName(),
+                    request.getLocation()
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(device);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @GetMapping("/{deviceId}/dashboard")

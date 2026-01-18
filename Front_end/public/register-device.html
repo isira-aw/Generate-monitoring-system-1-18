@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Device - Generator Monitoring System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #1e40af;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        input:disabled {
+            background-color: #f1f5f9;
+            cursor: not-allowed;
+        }
+
+        .help-text {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border: 2px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .info-box h3 {
+            color: #1e40af;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #1e40af;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .alert {
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            border: 2px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            border: 2px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #1e40af;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #1e3a8a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #cbd5e1;
+        }
+
+        .instructions {
+            margin-top: 30px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .instructions h2 {
+            color: #1e40af;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            color: #475569;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 640px) {
+            .card {
+                padding: 24px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Register New Device</h1>
+            <p class="subtitle">Register a new generator device that can be assigned to multiple users</p>
+
+            <div id="successAlert" class="alert alert-success hidden">
+                Device registered successfully! The device can now be assigned to users.
+            </div>
+
+            <div id="errorAlert" class="alert alert-error hidden"></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="deviceId">Device ID <span class="required">*</span></label>
+                    <input type="text" id="deviceId" name="deviceId" placeholder="e.g., GEN001" required>
+                    <p class="help-text">Unique identifier for the device (will be used in MQTT topics)</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="devicePassword">Device Password <span class="required">*</span></label>
+                    <input type="password" id="devicePassword" name="devicePassword" placeholder="Enter a secure password" required>
+                    <p class="help-text">Users will need this password to attach the device to their account</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Device Name <span class="required">*</span></label>
+                    <input type="text" id="name" name="name" placeholder="e.g., Main Building Generator" required>
+                    <p class="help-text">Friendly name for the device</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location <span class="required">*</span></label>
+                    <input type="text" id="location" name="location" placeholder="e.g., Building A, Floor 1" required>
+                    <p class="help-text">Physical location of the device</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>Multi-User Support</h3>
+                    <p>
+                        Once registered, this device can be assigned to multiple users. Users can attach the device
+                        to their account using the Device ID and Password from the "My Devices" page.
+                    </p>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="resetForm()">Reset</button>
+                    <button type="submit" class="btn-primary" id="submitBtn">Register Device</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="instructions">
+            <h2>Registration Instructions</h2>
+            <ol>
+                <li>Fill in all required fields marked with <span class="required">*</span></li>
+                <li>Choose a unique Device ID that will be used in MQTT topics (format: generator/DEVICE_ID/data)</li>
+                <li>Set a secure password that users will need to attach this device</li>
+                <li>Provide a descriptive name and location for easy identification</li>
+                <li>After registration, share the Device ID and Password with authorized users</li>
+                <li>Users can attach the device from their "My Devices" page using the credentials</li>
+                <li>Multiple users can attach the same device to monitor it simultaneously</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+        const form = document.getElementById('registerForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+
+        function showSuccess() {
+            successAlert.classList.remove('hidden');
+            errorAlert.classList.add('hidden');
+            setTimeout(() => {
+                successAlert.classList.add('hidden');
+            }, 5000);
+        }
+
+        function showError(message) {
+            errorAlert.textContent = message;
+            errorAlert.classList.remove('hidden');
+            successAlert.classList.add('hidden');
+        }
+
+        function hideAlerts() {
+            successAlert.classList.add('hidden');
+            errorAlert.classList.add('hidden');
+        }
+
+        function resetForm() {
+            form.reset();
+            hideAlerts();
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlerts();
+
+            const formData = new FormData(form);
+            const data = {
+                deviceId: formData.get('deviceId').trim(),
+                devicePassword: formData.get('devicePassword').trim(),
+                name: formData.get('name').trim(),
+                location: formData.get('location').trim()
+            };
+
+            // Validation
+            if (!data.deviceId || !data.devicePassword || !data.name || !data.location) {
+                showError('All fields are required');
+                return;
+            }
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registering...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/devices/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showSuccess();
+                    form.reset();
+                } else {
+                    const errorText = await response.text();
+                    if (response.status === 400) {
+                        showError('Device ID already exists or invalid data provided');
+                    } else {
+                        showError('Failed to register device. Please try again.');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Network error. Please check if the server is running.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Register Device';
+            }
+        });
+    </script>
+</body>
+</html>

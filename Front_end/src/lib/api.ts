@@ -76,4 +76,22 @@ export const deviceApi = {
     const response = await api.post('/api/devices', data);
     return response.data;
   },
+
+  attachDevice: async (data: {
+    deviceId: string;
+    devicePassword: string;
+  }) => {
+    const response = await api.post('/api/devices/attach', data);
+    return response.data;
+  },
+
+  registerDevice: async (data: {
+    deviceId: string;
+    devicePassword: string;
+    name: string;
+    location: string;
+  }) => {
+    const response = await api.post('/api/devices/register', data);
+    return response.data;
+  },
 };
