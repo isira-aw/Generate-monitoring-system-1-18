@@ -36,6 +36,16 @@ export const authApi = {
     const response = await api.get('/api/auth/me');
     return response.data;
   },
+
+  forgotPassword: async (data: { email: string }) => {
+    const response = await api.post('/api/auth/forgot-password', data);
+    return response.data;
+  },
+
+  resetPassword: async (data: { email: string; code: string; newPassword: string }) => {
+    const response = await api.post('/api/auth/reset-password', data);
+    return response.data;
+  },
 };
 
 // Device API
@@ -92,6 +102,41 @@ export const deviceApi = {
     location: string;
   }) => {
     const response = await api.post('/api/devices/register', data);
+    return response.data;
+  },
+
+  requestDeviceVerification: async (deviceId: number) => {
+    const response = await api.post(`/api/devices/${deviceId}/request-verification`);
+    return response.data;
+  },
+
+  verifyDeviceCode: async (deviceId: number, code: string) => {
+    const response = await api.post(`/api/devices/${deviceId}/verify-code`, { deviceId, code });
+    return response.data;
+  },
+
+  updateDevicePassword: async (deviceId: number, devicePassword: string) => {
+    const response = await api.put(`/api/devices/${deviceId}/password`, { devicePassword });
+    return response.data;
+  },
+};
+
+// Profile API
+export const profileApi = {
+  updateProfile: async (data: {
+    name?: string;
+    email?: string;
+    mobileNumber?: string;
+  }) => {
+    const response = await api.put('/api/profile', data);
+    return response.data;
+  },
+
+  changePassword: async (data: {
+    currentPassword: string;
+    newPassword: string;
+  }) => {
+    const response = await api.post('/api/profile/change-password', data);
     return response.data;
   },
 };

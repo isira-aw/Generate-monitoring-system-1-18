@@ -25,7 +25,7 @@ public class Device {
     @Column
     private String devicePassword;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "device_users",
         joinColumns = @JoinColumn(name = "device_id"),
