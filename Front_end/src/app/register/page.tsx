@@ -102,6 +102,8 @@ export default function RegisterPage() {
                 value={formData.mobileNumber}
                 onChange={handleChange}
                 pattern="[0-9]{10,15}"
+                title="Please enter a valid mobile number (10-15 digits, numbers only)"
+                placeholder="0710545522"
                 required
               />
             </div>
