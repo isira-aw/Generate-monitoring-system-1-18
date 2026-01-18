@@ -2,6 +2,7 @@ package com.generator.monitoring.controller;
 
 import com.generator.monitoring.dto.AddDeviceRequest;
 import com.generator.monitoring.dto.DeviceDto;
+import com.generator.monitoring.dto.RegisterDeviceRequest;
 import com.generator.monitoring.dto.ThresholdDto;
 import com.generator.monitoring.entity.Device;
 import com.generator.monitoring.enums.ThresholdParameter;
@@ -53,6 +54,23 @@ public class DeviceController {
                     userEmail
             );
             return ResponseEntity.ok(device);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<DeviceDto> registerDevice(
+            @RequestBody RegisterDeviceRequest request) {
+
+        try {
+            DeviceDto device = deviceService.registerDevice(
+                    request.getDeviceId(),
+                    request.getDevicePassword(),
+                    request.getName(),
+                    request.getLocation()
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(device);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }

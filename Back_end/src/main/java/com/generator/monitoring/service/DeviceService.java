@@ -41,11 +41,6 @@ public class DeviceService {
         Device device = deviceRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
 
-        // Check if device is already attached to another user
-        if (device.getUser() != null) {
-            throw new RuntimeException("Device is already attached to another user");
-        }
-
         // Validate or set device password
         if (device.getDevicePassword() == null) {
             // If device doesn't have a password yet, set it
@@ -61,9 +56,34 @@ public class DeviceService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userEmail));
 
-        // Attach device to user
-        device.setUser(user);
+        // Check if user is already assigned to this device
+        if (device.getUsers().contains(user)) {
+            throw new RuntimeException("Device is already attached to this user");
+        }
+
+        // Add user to device's users set
+        device.getUsers().add(user);
         Device saved = deviceRepository.save(device);
+
+        return mapToDto(saved);
+    }
+
+    public DeviceDto registerDevice(String deviceId, String devicePassword, String name, String location) {
+        if (deviceRepository.existsByDeviceId(deviceId)) {
+            throw new RuntimeException("Device already exists: " + deviceId);
+        }
+
+        Device device = new Device();
+        device.setDeviceId(deviceId);
+        device.setDevicePassword(devicePassword);
+        device.setName(name);
+        device.setLocation(location);
+        device.setActive(true);
+
+        Device saved = deviceRepository.save(device);
+
+        // Initialize default thresholds
+        thresholdService.initializeDefaultThresholds(saved);
 
         return mapToDto(saved);
     }
