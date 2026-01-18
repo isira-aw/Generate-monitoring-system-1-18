@@ -1,13 +1,11 @@
 package com.generator.monitoring.controller;
 
-import com.generator.monitoring.dto.AddDeviceRequest;
-import com.generator.monitoring.dto.DeviceDto;
-import com.generator.monitoring.dto.RegisterDeviceRequest;
-import com.generator.monitoring.dto.ThresholdDto;
+import com.generator.monitoring.dto.*;
 import com.generator.monitoring.entity.Device;
 import com.generator.monitoring.enums.ThresholdParameter;
 import com.generator.monitoring.service.DeviceService;
 import com.generator.monitoring.service.ThresholdService;
+import com.generator.monitoring.service.VerificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +24,9 @@ public class DeviceController {
 
     @Autowired
     private ThresholdService thresholdService;
+
+    @Autowired
+    private VerificationService verificationService;
 
     @GetMapping
     public ResponseEntity<List<DeviceDto>> getAllDevices(Authentication authentication) {
@@ -155,6 +156,76 @@ public class DeviceController {
 
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @PostMapping("/{deviceId}/request-verification")
+    public ResponseEntity<?> requestDeviceSettingsVerification(
+            @PathVariable Long deviceId,
+            Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            String userEmail = authentication.getName();
+            verificationService.requestDeviceSettingsVerification(userEmail, deviceId);
+
+            Map<String, String> response = Map.of("message", "Verification code sent to your email");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = Map.of("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    @PostMapping("/{deviceId}/verify-code")
+    public ResponseEntity<?> verifyDeviceSettingsCode(
+            @PathVariable Long deviceId,
+            @RequestBody VerifyDeviceCodeRequest request,
+            Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            String userEmail = authentication.getName();
+            boolean verified = verificationService.verifyDeviceSettingsCode(userEmail, deviceId, request.getCode());
+
+            if (verified) {
+                Map<String, Object> response = Map.of("message", "Verification successful", "verified", true);
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, Object> error = Map.of("message", "Invalid or expired verification code", "verified", false);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+        } catch (RuntimeException e) {
+            Map<String, Object> error = Map.of("message", e.getMessage(), "verified", false);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    @PutMapping("/{deviceId}/password")
+    public ResponseEntity<?> updateDevicePassword(
+            @PathVariable Long deviceId,
+            @RequestBody UpdateDevicePasswordRequest request,
+            Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            String userEmail = authentication.getName();
+            verificationService.updateDevicePassword(userEmail, deviceId, request.getDevicePassword());
+
+            Map<String, String> response = Map.of("message", "Device password updated successfully");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = Map.of("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
 }

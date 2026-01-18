@@ -1,10 +1,8 @@
 package com.generator.monitoring.controller;
 
-import com.generator.monitoring.dto.AuthResponse;
-import com.generator.monitoring.dto.LoginRequest;
-import com.generator.monitoring.dto.RegisterRequest;
-import com.generator.monitoring.dto.UserDto;
+import com.generator.monitoring.dto.*;
 import com.generator.monitoring.service.AuthService;
+import com.generator.monitoring.service.UserProfileService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -20,6 +18,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private UserProfileService userProfileService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -76,5 +77,27 @@ public class AuthController {
         String email = authentication.getName();
         UserDto user = authService.getUserByEmail(email);
         return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<AuthResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        try {
+            userProfileService.requestPasswordReset(request.getEmail());
+            return ResponseEntity.ok(new AuthResponse("Password reset code sent to your email", null));
+        } catch (RuntimeException e) {
+            // Don't reveal if email exists or not for security
+            return ResponseEntity.ok(new AuthResponse("If the email exists, a password reset code will be sent", null));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<AuthResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        try {
+            userProfileService.resetPassword(request.getEmail(), request.getCode(), request.getNewPassword());
+            return ResponseEntity.ok(new AuthResponse("Password reset successfully", null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new AuthResponse(e.getMessage(), null));
+        }
     }
 }

@@ -56,7 +56,7 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className="mb-6">
+            <div className="mb-4">
               <label className="block text-gray-700 mb-2" htmlFor="password">
                 Password
               </label>
@@ -68,6 +68,12 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+            </div>
+
+            <div className="mb-6 text-right">
+              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </Link>
             </div>
 
             <button
