@@ -20,6 +20,13 @@ public class Device {
     @Column(nullable = false, unique = true)
     private String deviceId;
 
+    @Column
+    private String devicePassword;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(nullable = false)
     private String name;
 
