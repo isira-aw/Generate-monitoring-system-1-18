@@ -281,7 +281,8 @@ public class DeviceService {
 
         final String finalUserEmail = userEmail.trim();
 
-        Device device = deviceRepository.findById(deviceId)
+        // Use findByIdWithUsers to eagerly load users collection
+        Device device = deviceRepository.findByIdWithUsers(deviceId)
                 .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + deviceId));
 
         User user = userRepository.findByEmail(finalUserEmail)
@@ -318,7 +319,8 @@ public class DeviceService {
         final String finalDeviceId = deviceId.trim();
         final String finalUserEmail = userEmail.trim();
 
-        Device device = deviceRepository.findByDeviceId(finalDeviceId)
+        // Use findByDeviceIdWithUsers to eagerly load users collection
+        Device device = deviceRepository.findByDeviceIdWithUsers(finalDeviceId)
                 .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + finalDeviceId));
 
         User user = userRepository.findByEmail(finalUserEmail)
@@ -353,7 +355,8 @@ public class DeviceService {
 
         final String finalUserEmail = userEmail.trim();
 
-        Device device = deviceRepository.findById(deviceId)
+        // Use findByIdWithUsers to eagerly load users collection
+        Device device = deviceRepository.findByIdWithUsers(deviceId)
                 .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + deviceId));
 
         User user = userRepository.findByEmail(finalUserEmail)
