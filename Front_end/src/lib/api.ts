@@ -119,6 +119,21 @@ export const deviceApi = {
     const response = await api.put(`/api/devices/${deviceId}/password`, { devicePassword });
     return response.data;
   },
+
+  detachDevice: async (deviceId: number) => {
+    const response = await api.delete(`/api/devices/${deviceId}/detach`);
+    return response.data;
+  },
+
+  deleteDevice: async (deviceId: string) => {
+    const response = await api.delete(`/api/devices/${deviceId}`);
+    return response.data;
+  },
+
+  updateDeviceInfo: async (deviceId: number, name: string, location: string) => {
+    const response = await api.put(`/api/devices/${deviceId}/info`, { name, location });
+    return response.data;
+  },
 };
 
 // Profile API

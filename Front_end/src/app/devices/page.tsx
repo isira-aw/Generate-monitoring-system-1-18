@@ -29,6 +29,10 @@ export default function DevicesPage() {
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingDevice, setEditingDevice] = useState<Device | null>(null);
+  const [editFormData, setEditFormData] = useState({ name: '', location: '' });
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -142,6 +146,83 @@ export default function DevicesPage() {
     setSuccessMessage('');
   };
 
+  const handleDetachDevice = async (deviceId: number) => {
+    if (!confirm('Are you sure you want to detach this device? You will need the device password to re-attach it.')) {
+      return;
+    }
+
+    try {
+      await deviceApi.detachDevice(deviceId);
+      setSuccessMessage('Device detached successfully');
+      await loadDevices();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message;
+      setError(errorMessage || 'Failed to detach device');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const handleDeleteDevice = async (deviceId: string) => {
+    if (!confirm('Are you sure you want to DELETE this device? This action cannot be undone and will remove the device for ALL users!')) {
+      return;
+    }
+
+    try {
+      await deviceApi.deleteDevice(deviceId);
+      setSuccessMessage('Device deleted successfully');
+      await loadDevices();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message;
+      setError(errorMessage || 'Failed to delete device');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
+  const handleEditDevice = (device: Device) => {
+    setEditingDevice(device);
+    setEditFormData({ name: device.name, location: device.location });
+    setShowEditModal(true);
+  };
+
+  const handleSubmitEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!editingDevice) return;
+
+    if (!editFormData.name.trim() || !editFormData.location.trim()) {
+      setFormError('Name and location are required');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await deviceApi.updateDeviceInfo(
+        editingDevice.id,
+        editFormData.name.trim(),
+        editFormData.location.trim()
+      );
+
+      setSuccessMessage('Device updated successfully');
+      setShowEditModal(false);
+      setEditingDevice(null);
+      await loadDevices();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message;
+      setFormError(errorMessage || 'Failed to update device');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingDevice(null);
+    setFormError('');
+  };
+
   if (authLoading || loading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
@@ -217,19 +298,41 @@ export default function DevicesPage() {
                 </p>
               )}
 
-              <div className="flex gap-2">
-                <Link
-                  href={`/device/${device.deviceId}/dashboard`}
-                  className="btn btn-primary flex-1 text-center"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href={`/device/${device.deviceId}/settings`}
-                  className="btn btn-secondary flex-1 text-center"
-                >
-                  Settings
-                </Link>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Link
+                    href={`/device/${device.deviceId}/dashboard`}
+                    className="btn btn-primary flex-1 text-center"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href={`/device/${device.deviceId}/settings`}
+                    className="btn btn-secondary flex-1 text-center"
+                  >
+                    Settings
+                  </Link>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEditDevice(device)}
+                    className="btn bg-blue-500 hover:bg-blue-600 text-white flex-1"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDetachDevice(device.id)}
+                    className="btn bg-yellow-500 hover:bg-yellow-600 text-white flex-1"
+                  >
+                    Detach
+                  </button>
+                  <button
+                    onClick={() => handleDeleteDevice(device.deviceId)}
+                    className="btn bg-red-500 hover:bg-red-600 text-white flex-1"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -311,6 +414,94 @@ export default function DevicesPage() {
                   disabled={submitting}
                 >
                   {submitting ? 'Adding...' : 'Add Device'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Device Modal */}
+      {showEditModal && editingDevice && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Edit Device</h2>
+              <button
+                onClick={handleCloseEditModal}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+                disabled={submitting}
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitEdit}>
+              {formError && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  {formError}
+                </div>
+              )}
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Device ID (Read-only)
+                </label>
+                <input
+                  type="text"
+                  className="input w-full bg-gray-100"
+                  value={editingDevice.deviceId}
+                  disabled
+                />
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 mb-2">
+                  Device Name
+                </label>
+                <input
+                  type="text"
+                  id="edit-name"
+                  className="input w-full"
+                  placeholder="Enter device name"
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  disabled={submitting}
+                  required
+                />
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="edit-location" className="block text-sm font-medium text-gray-700 mb-2">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  id="edit-location"
+                  className="input w-full"
+                  placeholder="Enter location"
+                  value={editFormData.location}
+                  onChange={(e) => setEditFormData({ ...editFormData, location: e.target.value })}
+                  disabled={submitting}
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleCloseEditModal}
+                  className="btn btn-secondary flex-1"
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary flex-1"
+                  disabled={submitting}
+                >
+                  {submitting ? 'Updating...' : 'Update Device'}
                 </button>
               </div>
             </form>

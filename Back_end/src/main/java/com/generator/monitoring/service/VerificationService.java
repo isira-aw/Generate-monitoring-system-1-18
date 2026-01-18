@@ -42,10 +42,12 @@ public class VerificationService {
             throw new InvalidInputException("Device ID cannot be null");
         }
 
+        final String finalUserEmail = userEmail.trim();
+
         // Find user
-        User user = userRepository.findByEmail(userEmail.trim())
+        User user = userRepository.findByEmail(finalUserEmail)
                 .orElseThrow(() -> {
-                    logger.error("User not found: {}", userEmail);
+                    logger.error("User not found: {}", finalUserEmail);
                     return new UserNotFoundException("User not found");
                 });
 
@@ -61,7 +63,7 @@ public class VerificationService {
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
         if (!hasAccess) {
-            logger.error("User {} does not have access to device {}", userEmail, deviceId);
+            logger.error("User {} does not have access to device {}", finalUserEmail, deviceId);
             throw new DeviceAccessDeniedException("You don't have access to this device");
         }
 
@@ -71,7 +73,7 @@ public class VerificationService {
         // Create verification code
         VerificationCode verificationCode = new VerificationCode();
         verificationCode.setCode(code);
-        verificationCode.setEmail(userEmail.trim());
+        verificationCode.setEmail(finalUserEmail);
         verificationCode.setType(VerificationCode.VerificationType.DEVICE_SETTINGS);
         verificationCode.setDeviceId(deviceId);
         verificationCode.setExpiresAt(LocalDateTime.now().plusMinutes(10));
@@ -80,9 +82,9 @@ public class VerificationService {
         verificationCodeRepository.save(verificationCode);
 
         // Send email
-        emailService.sendDeviceSettingsVerificationEmail(userEmail, code);
+        emailService.sendDeviceSettingsVerificationEmail(finalUserEmail, code);
 
-        logger.info("Verification code sent successfully to user: {}", userEmail);
+        logger.info("Verification code sent successfully to user: {}", finalUserEmail);
     }
 
     @Transactional
@@ -152,10 +154,12 @@ public class VerificationService {
             throw new InvalidInputException("New password cannot be empty");
         }
 
+        final String finalUserEmail = userEmail.trim();
+
         // Find user
-        User user = userRepository.findByEmail(userEmail.trim())
+        User user = userRepository.findByEmail(finalUserEmail)
                 .orElseThrow(() -> {
-                    logger.error("User not found: {}", userEmail);
+                    logger.error("User not found: {}", finalUserEmail);
                     return new UserNotFoundException("User not found");
                 });
 
@@ -171,7 +175,7 @@ public class VerificationService {
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
         if (!hasAccess) {
-            logger.error("User {} does not have access to device {}", userEmail, deviceId);
+            logger.error("User {} does not have access to device {}", finalUserEmail, deviceId);
             throw new DeviceAccessDeniedException("You don't have access to this device");
         }
 

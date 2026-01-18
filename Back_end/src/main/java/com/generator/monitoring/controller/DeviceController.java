@@ -185,4 +185,54 @@ public class DeviceController {
         Map<String, String> response = Map.of("message", "Device password updated successfully");
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{deviceId}/detach")
+    public ResponseEntity<?> detachDevice(
+            @PathVariable Long deviceId,
+            Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String userEmail = authentication.getName();
+        deviceService.detachDeviceFromUser(deviceId, userEmail);
+
+        Map<String, String> response = Map.of("message", "Device detached successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{deviceId}")
+    public ResponseEntity<?> deleteDevice(
+            @PathVariable String deviceId,
+            Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String userEmail = authentication.getName();
+        deviceService.deleteDevice(deviceId, userEmail);
+
+        Map<String, String> response = Map.of("message", "Device deleted successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{deviceId}/info")
+    public ResponseEntity<DeviceDto> updateDeviceInfo(
+            @PathVariable Long deviceId,
+            @RequestBody Map<String, String> deviceData,
+            Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String userEmail = authentication.getName();
+        String name = deviceData.get("name");
+        String location = deviceData.get("location");
+
+        DeviceDto device = deviceService.updateDeviceInfo(deviceId, name, location, userEmail);
+        return ResponseEntity.ok(device);
+    }
 }
