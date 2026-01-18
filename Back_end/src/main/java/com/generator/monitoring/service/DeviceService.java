@@ -56,8 +56,11 @@ public class DeviceService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userEmail));
 
-        // Check if user is already assigned to this device
-        if (device.getUsers().contains(user)) {
+        // Check if user is already assigned to this device by comparing user IDs
+        boolean alreadyAttached = device.getUsers().stream()
+                .anyMatch(u -> u.getId().equals(user.getId()));
+
+        if (alreadyAttached) {
             throw new RuntimeException("Device is already attached to this user");
         }
 
