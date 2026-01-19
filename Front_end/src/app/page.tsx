@@ -603,20 +603,3 @@ function ArchitectureRow({ label, value, status, alert }: any) {
     </div>
   );
 }
-
-// Updated FeatureItem for the Dark Modern UI
-function FeatureItem2({ icon, title, desc }) {
-  return (
-    <div className="bg-white/10 backdrop-blur-md border border-white/10 p-8 rounded-[2rem] hover:bg-white/15 transition-all duration-300 group">
-      <div className="bg-blue-500/20 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-        <div className="text-blue-300 group-hover:text-white transition-colors">
-          {icon}
-        </div>
-      </div>
-      <h3 className="text-2xl font-bold mb-4">{title}</h3>
-      <p className="text-blue-100/70 leading-relaxed text-lg">
-        {desc}
-      </p>
-    </div>
-  );
-}
