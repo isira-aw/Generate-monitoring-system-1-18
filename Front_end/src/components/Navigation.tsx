@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import HomeIcon from '@heroicons/react/16/solid/HomeIcon';
 
 export default function Navigation() {
   const { user, logout } = useAuth();
@@ -53,6 +54,14 @@ export default function Navigation() {
                 </Link>
               </>
             )}
+            <Link
+              href="/"
+              className="text-gray-700 hover:text-primary flex items-center bg-blue-300 p-2 rounded-full"
+              title="Home"
+            >
+              <HomeIcon className="h-5 w-8" />
+            </Link>
+
           </div>
         </div>
       </div>
