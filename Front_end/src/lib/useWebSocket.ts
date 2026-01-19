@@ -7,14 +7,102 @@ const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080/ws';
 export interface TelemetryData {
   deviceId: string;
   timestamp: string;
-  voltage: number;
-  current: number;
-  frequency: number;
-  power: number;
-  temperature: number;
-  fuelLevel: number;
-  oilPressure: number;
-  rpm: number;
+
+  // RPM
+  rpm?: number;
+
+  // Generator Power (Real Power)
+  generatorPL1?: number;
+  generatorPL2?: number;
+  generatorPL3?: number;
+
+  // Generator Reactive Power
+  generatorQ?: number;
+  generatorQL1?: number;
+  generatorQL2?: number;
+  generatorQL3?: number;
+
+  // Generator Apparent Power
+  generatorS?: number;
+  generatorSL1?: number;
+  generatorSL2?: number;
+  generatorSL3?: number;
+
+  // Generator Power Factor
+  generatorPowerFactor?: number;
+
+  // Generator Frequency
+  generatorFrequency?: number;
+
+  // Generator Voltage (Line to Neutral)
+  generatorVoltageL1N?: number;
+  generatorVoltageL2N?: number;
+  generatorVoltageL3N?: number;
+
+  // Generator Voltage (Line to Line)
+  generatorVoltageL1L2?: number;
+  generatorVoltageL2L3?: number;
+  generatorVoltageL3L1?: number;
+
+  // Generator Current
+  generatorCurrentL1?: number;
+  generatorCurrentL2?: number;
+  generatorCurrentL3?: number;
+
+  // Earth Fault Current
+  earthFaultCurrent?: number;
+
+  // Mains/Bus Frequency
+  mainsBusFrequency?: number;
+
+  // Mains/Bus Voltage (Line to Neutral)
+  mainsBusVoltageL1N?: number;
+  mainsBusVoltageL2N?: number;
+  mainsBusVoltageL3N?: number;
+
+  // Mains/Bus Voltage (Line to Line)
+  mainsBusVoltageL1L2?: number;
+  mainsBusVoltageL2L3?: number;
+  mainsBusVoltageL3L1?: number;
+
+  // Mains Current
+  mainsL1Current?: number;
+
+  // Mains Import
+  mainsImportP?: number;
+  mainsImportQ?: number;
+
+  // Mains Power Factor
+  mainsPF?: number;
+
+  // Vector Shift and ROCOF
+  maxVectorShift?: number;
+  rocof?: number;
+  maxRocof?: number;
+
+  // Load
+  loadP?: number;
+  loadQ?: number;
+  loadPF?: number;
+
+  // Battery and D+
+  batteryVolts?: number;
+  dPlus?: number;
+
+  // Oil
+  oilPressure?: number;
+  oilTemperature?: number;
+
+  // Fuel Level
+  fuelLevel?: number;
+
+  // E-STOP (Binary)
+  eStop?: boolean;
+
+  // Alarm string from device
+  alarm?: string;
+
+  // Device alarms list (for compatibility)
   device_alarms?: string[];
 }
 
