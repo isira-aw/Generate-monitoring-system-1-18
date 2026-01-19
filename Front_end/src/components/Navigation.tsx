@@ -32,6 +32,9 @@ export default function Navigation() {
 
             {user ? (
               <>
+                <Link href="/profile" className="text-gray-700 hover:text-primary">
+                  Profile
+                </Link>
                 <span className="text-gray-600">Welcome, {user.name}</span>
                 <button
                   onClick={handleLogout}
