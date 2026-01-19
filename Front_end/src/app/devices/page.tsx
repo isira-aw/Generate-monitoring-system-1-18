@@ -163,22 +163,6 @@ export default function DevicesPage() {
     }
   };
 
-  const handleDeleteDevice = async (deviceId: string) => {
-    if (!confirm('Are you sure you want to DELETE this device? This action cannot be undone and will remove the device for ALL users!')) {
-      return;
-    }
-
-    try {
-      await deviceApi.deleteDevice(deviceId);
-      setSuccessMessage('Device deleted successfully');
-      await loadDevices();
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message;
-      setError(errorMessage || 'Failed to delete device');
-      setTimeout(() => setError(''), 3000);
-    }
-  };
 
   const handleEditDevice = (device: Device) => {
     setEditingDevice(device);
@@ -270,73 +254,74 @@ export default function DevicesPage() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {devices.map((device) => (
-            <div key={device.id} className="card hover:shadow-lg transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-semibold">{device.name}</h3>
-                  <p className="text-sm text-gray-500">ID: {device.deviceId}</p>
-                </div>
-                <span
-                  className={`px-2 py-1 text-xs rounded ${
-                    device.active
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {device.active ? 'Active' : 'Inactive'}
-                </span>
-              </div>
-
-              <p className="text-gray-600 mb-2">
-                {device.location || 'Unknown location'}
-              </p>
-
-              {device.lastSeenAt && (
-                <p className="text-sm text-gray-500 mb-4">
-                  Last seen: {new Date(device.lastSeenAt).toLocaleString()}
-                </p>
-              )}
-
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Link
-                    href={`/device/${device.deviceId}/dashboard`}
-                    className="btn btn-primary flex-1 text-center"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href={`/device/${device.deviceId}/settings`}
-                    className="btn btn-secondary flex-1 text-center"
-                  >
-                    Settings
-                  </Link>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEditDevice(device)}
-                    className="btn bg-blue-500 hover:bg-blue-600 text-white flex-1"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDetachDevice(device.deviceId)}
-                    className="btn bg-yellow-500 hover:bg-yellow-600 text-white flex-1"
-                  >
-                    Detach
-                  </button>
-                  <button
-                    onClick={() => handleDeleteDevice(device.deviceId)}
-                    className="btn bg-red-500 hover:bg-red-600 text-white flex-1"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+  {devices.map((device) => (
+    <div
+      key={device.id}
+      className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 p-5 flex flex-col justify-between"
+    >
+      {/* Header */}
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-xl font-semibold text-gray-800">{device.name}</h3>
+          <p className="text-sm text-gray-500 mt-1">ID: {device.deviceId}</p>
         </div>
+        <span
+          className={`px-3 py-1 text-xs font-medium rounded-full ${
+            device.active
+              ? 'bg-green-100 text-green-800'
+              : 'bg-gray-100 text-gray-800'
+          }`}
+        >
+          {device.active ? 'Active' : 'Inactive'}
+        </span>
+      </div>
+
+      {/* Location & Last Seen */}
+      <div className="mb-4">
+        <p className="text-gray-600">{device.location || 'Unknown location'}</p>
+        {device.lastSeenAt && (
+          <p className="text-sm text-gray-400 mt-1">
+            Last seen: {new Date(device.lastSeenAt).toLocaleString()}
+          </p>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <Link
+            href={`/device/${device.deviceId}/dashboard`}
+            className="flex-1 text-center py-2 px-4 btn btn-primary text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
+          >
+            Dashboard
+          </Link>
+          
+        </div>
+        <div className="flex gap-2">
+          <Link
+            href={`/device/${device.deviceId}/settings`}
+            className="flex-1 text-center py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+          >
+            Thresholds
+          </Link>
+          <button
+            onClick={() => handleEditDevice(device)}
+            className="flex-1 py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleDetachDevice(device.deviceId)}
+            className="flex-1 py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
+          >
+            Detach
+          </button>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
       )}
 
       {/* Add Device Modal */}
