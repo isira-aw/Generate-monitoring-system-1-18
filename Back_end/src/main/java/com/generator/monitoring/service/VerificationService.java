@@ -52,8 +52,8 @@ public class VerificationService {
                     return new UserNotFoundException("User not found");
                 });
 
-        // Find device by deviceId (String)
-        Device device = deviceRepository.findByDeviceId(finalDeviceId)
+        // Find device by deviceId (String) with users eagerly loaded
+        Device device = deviceRepository.findByDeviceIdWithUsers(finalDeviceId)
                 .orElseThrow(() -> {
                     logger.error("Device not found with ID: {}", finalDeviceId);
                     return new DeviceNotFoundException("Device not found");
@@ -175,8 +175,8 @@ public class VerificationService {
                     return new UserNotFoundException("User not found");
                 });
 
-        // Find device by deviceId (String)
-        Device device = deviceRepository.findByDeviceId(finalDeviceId)
+        // Find device by deviceId (String) with users eagerly loaded
+        Device device = deviceRepository.findByDeviceIdWithUsers(finalDeviceId)
                 .orElseThrow(() -> {
                     logger.error("Device not found with ID: {}", finalDeviceId);
                     return new DeviceNotFoundException("Device not found");

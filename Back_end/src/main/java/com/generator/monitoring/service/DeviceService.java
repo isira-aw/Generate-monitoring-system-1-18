@@ -282,7 +282,7 @@ public class DeviceService {
         final String finalDeviceId = deviceId.trim();
         final String finalUserEmail = userEmail.trim();
 
-        Device device = deviceRepository.findByDeviceId(finalDeviceId)
+        Device device = deviceRepository.findByDeviceIdWithUsers(finalDeviceId)
                 .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + finalDeviceId));
 
         User user = userRepository.findByEmail(finalUserEmail)
@@ -319,7 +319,7 @@ public class DeviceService {
         final String finalDeviceId = deviceId.trim();
         final String finalUserEmail = userEmail.trim();
 
-        Device device = deviceRepository.findByDeviceId(finalDeviceId)
+        Device device = deviceRepository.findByDeviceIdWithUsers(finalDeviceId)
                 .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + finalDeviceId));
 
         User user = userRepository.findByEmail(finalUserEmail)
@@ -355,7 +355,7 @@ public class DeviceService {
         final String finalDeviceId = deviceId.trim();
         final String finalUserEmail = userEmail.trim();
 
-        Device device = deviceRepository.findByDeviceId(finalDeviceId)
+        Device device = deviceRepository.findByDeviceIdWithUsers(finalDeviceId)
                 .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + finalDeviceId));
 
         User user = userRepository.findByEmail(finalUserEmail)
