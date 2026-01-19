@@ -105,22 +105,22 @@ export const deviceApi = {
     return response.data;
   },
 
-  requestDeviceVerification: async (deviceId: number) => {
+  requestDeviceVerification: async (deviceId: string) => {
     const response = await api.post(`/api/devices/${deviceId}/request-verification`);
     return response.data;
   },
 
-  verifyDeviceCode: async (deviceId: number, code: string) => {
+  verifyDeviceCode: async (deviceId: string, code: string) => {
     const response = await api.post(`/api/devices/${deviceId}/verify-code`, { deviceId, code });
     return response.data;
   },
 
-  updateDevicePassword: async (deviceId: number, devicePassword: string) => {
+  updateDevicePassword: async (deviceId: string, devicePassword: string) => {
     const response = await api.put(`/api/devices/${deviceId}/password`, { devicePassword });
     return response.data;
   },
 
-  detachDevice: async (deviceId: number) => {
+  detachDevice: async (deviceId: string) => {
     const response = await api.delete(`/api/devices/${deviceId}/detach`);
     return response.data;
   },
@@ -130,7 +130,7 @@ export const deviceApi = {
     return response.data;
   },
 
-  updateDeviceInfo: async (deviceId: number, name: string, location: string) => {
+  updateDeviceInfo: async (deviceId: string, name: string, location: string) => {
     const response = await api.put(`/api/devices/${deviceId}/info`, { name, location });
     return response.data;
   },
