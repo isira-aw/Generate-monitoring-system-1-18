@@ -146,7 +146,7 @@ export default function DevicesPage() {
     setSuccessMessage('');
   };
 
-  const handleDetachDevice = async (deviceId: number) => {
+  const handleDetachDevice = async (deviceId: string) => {
     if (!confirm('Are you sure you want to detach this device? You will need the device password to re-attach it.')) {
       return;
     }
@@ -199,7 +199,7 @@ export default function DevicesPage() {
     setSubmitting(true);
     try {
       await deviceApi.updateDeviceInfo(
-        editingDevice.id,
+        editingDevice.deviceId,
         editFormData.name.trim(),
         editFormData.location.trim()
       );
@@ -321,7 +321,7 @@ export default function DevicesPage() {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDetachDevice(device.id)}
+                    onClick={() => handleDetachDevice(device.deviceId)}
                     className="btn bg-yellow-500 hover:bg-yellow-600 text-white flex-1"
                   >
                     Detach

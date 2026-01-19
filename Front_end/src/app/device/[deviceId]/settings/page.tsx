@@ -92,7 +92,7 @@ export default function SettingsPage() {
     setSendingCode(true);
 
     try {
-      await deviceApi.requestDeviceVerification(device.id);
+      await deviceApi.requestDeviceVerification(device.deviceId);
       alert('A verification code has been sent to your email');
     } catch (err: any) {
       setVerificationError(err.response?.data?.message || 'Failed to send verification code');
@@ -109,7 +109,7 @@ export default function SettingsPage() {
     setVerifying(true);
 
     try {
-      const response = await deviceApi.verifyDeviceCode(device.id, verificationCode);
+      const response = await deviceApi.verifyDeviceCode(device.deviceId, verificationCode);
       if (response.verified) {
         setVerified(true);
         loadThresholds();
@@ -158,7 +158,7 @@ export default function SettingsPage() {
     setUpdatingPassword(true);
 
     try {
-      await deviceApi.updateDevicePassword(device.id, newDevicePassword);
+      await deviceApi.updateDevicePassword(device.deviceId, newDevicePassword);
       setPasswordSuccess('Device password updated successfully');
       setNewDevicePassword('');
       setTimeout(() => setPasswordSuccess(''), 3000);
