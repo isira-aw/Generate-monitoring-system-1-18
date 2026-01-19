@@ -6,9 +6,41 @@ import { gsap } from 'gsap';
 import { 
   Activity, Cpu, Phone, Layers, ChevronRight, 
   Globe,
-  ArrowRight
+  ArrowRight,
+  PlaneIcon,
+  ShieldCheck
 } from 'lucide-react';
 import { Zap, Twitter, Github, Linkedin, Mail } from "lucide-react";
+import { Variants, easeOut } from "framer-motion";
+import Link from 'next/link';
+
+
+// Animation variants for 3D-like feel
+
+const stagger: Variants = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const fadeInUp: Variants = {
+  initial: {
+    opacity: 0,
+    y: 24,
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: easeOut,
+    },
+  },
+};
+
 
 // --- TYPES ---
 interface Dot {
@@ -170,68 +202,55 @@ export default function LandingPage() {
 
   return (
     <div className="relative min-h-screen bg-white text-slate-900">
-      
       {/* 1. BACKGROUND (Does not block clicks) */}
       <GlobalDotGrid />
 
       {/* 2. CONTENT (Interaction happens here) */}
       <div className="relative z-10">
-        
-        {/* NAV */}
-        {/* <nav className="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
-          <div className="text-2xl font-black text-blue-600">LIVEGEN</div>
-          <button 
-            onClick={() => handleButtonClick('Sign In')}
-            className="bg-slate-900 text-white px-6 py-2 rounded-full font-bold text-sm hover:bg-slate-700 transition-colors"
-          >
-            Sign In
-          </button>
-        </nav> */}
 
         {/* HERO */}
         <section className="pt-20 pb-32 px-6">
-          <div className="max-w-5xl mx-auto text-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <h1 className="text-6xl md:text-9xl font-black tracking-tighter mb-8 leading-none">
-                LiveGen <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                  AI Telemetry
-                </span>
-              </h1>
-              <p className="text-xl text-slate-500 max-w-2xl mx-auto mb-12">
-                Real-time industrial intelligence. Monitor your power grid with precision AI analytics.
-              </p>
-              <div className="flex justify-center gap-4">
-                <button 
-                  onClick={() => handleButtonClick('Get Started')}
-                  className="bg-blue-600 text-white px-10 py-5 rounded-2xl font-bold flex items-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-blue-200"
-                >
-                  Get Started <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
+          <div className="max-w-7xl mx-auto px-6">
+          <motion.div 
+            initial="initial" animate="animate" variants={stagger}
+            className="flex flex-col items-center text-center"
+          >
+            <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-600 font-bold text-sm mb-8 border border-blue-100 shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+              </span>
+              V2.0 LIVE MONITORING NOW ACTIVE
             </motion.div>
-          </div>
+
+            <motion.h1 variants={fadeInUp} className="text-6xl md:text-8xl font-black tracking-tight mb-8">
+              LiveGen <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 p-2">
+                AI Powered Telemetry
+              </span>
+            </motion.h1>
+
+            <motion.p variants={fadeInUp} className="text-xl text-slate-500 max-w-3xl mb-12 leading-relaxed">
+              Experience the next generation of industrial maintenance. Real-time monitoring, 
+              predictive AI analysis, and instant threshold response for your entire fleet.
+            </motion.p>
+
+            <motion.div variants={fadeInUp} className="flex flex-wrap justify-center gap-6">
+              <Link href="/dashboard" className="group relative bg-blue-600 text-white px-10 py-5 rounded-2xl font-bold text-lg shadow-2xl shadow-blue-200 overflow-hidden transition-all hover:scale-105 active:scale-95">
+                <span className="relative z-10 flex items-center gap-2">View Live Demo <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+
+              <Link href="/dashboard" className="group relative bg-blue-100 text-black px-10 py-5 rounded-2xl font-bold text-lg shadow-2xl shadow-blue-200 overflow-hidden transition-all  active:scale-95">
+                <span className="relative z-10 flex items-center gap-2">Request Quote <PlaneIcon className="w-5 h-5 transition-transform" /></span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
         </section>
 
-        {/* FEATURES */}
-        <section className="py-20 px-6 max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
-          <FeatureCard 
-            icon={<Cpu />} 
-            title="Predictive AI" 
-            desc="Detect anomalies before they become critical failures." 
-          />
-          <FeatureCard 
-            icon={<Layers />} 
-            title="Security" 
-            desc="End-to-end encrypted telemetry data streams." 
-          />
-          <FeatureCard 
-            icon={<Zap />} 
-            title="Performance" 
-            desc="Sub-millisecond data refresh rates via WebSockets." 
-          />
-        </section>
-
+      
               {/* 2. LIVE DASHBOARD PREVIEW (3D CARD EFFECT) */}
       <section className="py-20 -mt-20">
         <div className="max-w-6xl mx-auto px-6">
@@ -277,35 +296,68 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. KEY FEATURES WITH GLASS EFFECTS */}
-      <section className="py-32 relative ">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-black mb-6">Built for Mission-Critical <br/> Environments</h2>
+      <section className="py-24 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight">
+            Built for Mission-Critical <br/> 
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+              Environments
+            </span>
+          </h2>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-10">
+          {/* Feature 1: AI */}
+          <div className="bg-gradient-to-br from-blue-700 to-blue-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl transition-transform hover:scale-[1.02] duration-300">
+            <div className="absolute -top-10 -right-10 opacity-10">
+              <Activity className="w-48 h-48" />
+            </div>
+            <div className="relative z-10">
+              <div className="bg-white/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-md">
+                <Cpu className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Predictive AI</h3>
+              <p className="text-blue-100 text-lg leading-relaxed">
+                Analyzes vibration and heat patterns to predict engine failure 48 hours before it happens.
+              </p>
+            </div>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <FeatureItem 
-              icon={<Cpu className="w-8 h-8" />}
-              title="Predictive AI"
-              desc="Analyzes vibration and heat patterns to predict engine failure 48 hours before it happens."
-              color="blue"
-            />
-            <FeatureItem 
-              icon={<Layers className="w-8 h-8" />}
-              title="Multi-Level Access"
-              desc="JWT-powered security layers ensure only authorized personnel can change threshold limits."
-              color="indigo"
-            />
-            <FeatureItem 
-              icon={<Zap className="w-8 h-8" />}
-              title="Instant Response"
-              desc="Automatic shutdown triggers if voltage spikes beyond safety margins, saving your hardware."
-              color="emerald"
-            />
+
+          {/* Feature 2: Security */}
+          <div className="bg-gradient-to-br from-indigo-700 to-indigo-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl transition-transform hover:scale-[1.02] duration-300">
+            <div className="absolute -top-10 -right-10 opacity-10">
+              <ShieldCheck className="w-48 h-48" />
+            </div>
+            <div className="relative z-10">
+              <div className="bg-white/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-md">
+                <Layers className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Multi-Level Access</h3>
+              <p className="text-indigo-100 text-lg leading-relaxed">
+                JWT-powered security layers ensure only authorized personnel can change threshold limits.
+              </p>
+            </div>
+          </div>
+
+          {/* Feature 3: Response */}
+          <div className="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl transition-transform hover:scale-[1.02] duration-300">
+            <div className="absolute -top-10 -right-10 opacity-10">
+              <Zap className="w-48 h-48" />
+            </div>
+            <div className="relative z-10">
+              <div className="bg-white/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-md">
+                <Zap className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Instant Response</h3>
+              <p className="text-emerald-50 text-lg leading-relaxed">
+                Automatic shutdown triggers if voltage spikes beyond safety margins, saving your hardware.
+              </p>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* 4. SYSTEM ARCHITECTURE (VISUAL FLOW) */}
       <section className="py-32 bg-slate-950 text-white overflow-hidden ">
@@ -548,6 +600,23 @@ function ArchitectureRow({ label, value, status, alert }: any) {
           {status}
         </span>
       </div>
+    </div>
+  );
+}
+
+// Updated FeatureItem for the Dark Modern UI
+function FeatureItem2({ icon, title, desc }) {
+  return (
+    <div className="bg-white/10 backdrop-blur-md border border-white/10 p-8 rounded-[2rem] hover:bg-white/15 transition-all duration-300 group">
+      <div className="bg-blue-500/20 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+        <div className="text-blue-300 group-hover:text-white transition-colors">
+          {icon}
+        </div>
+      </div>
+      <h3 className="text-2xl font-bold mb-4">{title}</h3>
+      <p className="text-blue-100/70 leading-relaxed text-lg">
+        {desc}
+      </p>
     </div>
   );
 }
