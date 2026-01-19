@@ -269,40 +269,22 @@ public class DeviceService {
 
     @Transactional
     public void detachDeviceFromUser(String deviceId, String userEmail) {
-        logger.info("Detaching device ID {} from user: {}", deviceId, userEmail);
 
-        if (deviceId == null || deviceId.trim().isEmpty()) {
-            throw new InvalidInputException("Device ID cannot be empty");
+        Device device = deviceRepository.findByDeviceId(deviceId.trim())
+                .orElseThrow(() -> new DeviceNotFoundException("Device not found"));
+
+        User user = userRepository.findByEmail(userEmail.trim())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (!device.getUsers().contains(user)) {
+            throw new InvalidInputException("Device is not attached to this user");
         }
 
-        if (userEmail == null || userEmail.trim().isEmpty()) {
-            throw new InvalidInputException("User email cannot be empty");
-        }
+        device.removeUser(user);
 
-        final String finalDeviceId = deviceId.trim();
-        final String finalUserEmail = userEmail.trim();
-
-        Device device = deviceRepository.findByDeviceId(finalDeviceId)
-                .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + finalDeviceId));
-
-        User user = userRepository.findByEmail(finalUserEmail)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + finalUserEmail));
-
-        // Check if user is attached to this device
-        boolean isAttached = device.getUsers().stream()
-                .anyMatch(u -> u.getId().equals(user.getId()));
-
-        if (!isAttached) {
-            logger.warn("User {} is not attached to device {}", finalUserEmail, finalDeviceId);
-            throw new InvalidInputException("Device is not attached to your account");
-        }
-
-        // Remove user from device
-        device.getUsers().removeIf(u -> u.getId().equals(user.getId()));
         deviceRepository.save(device);
-
-        logger.info("Successfully detached device {} from user {}", finalDeviceId, finalUserEmail);
     }
+
 
     @Transactional
     public void deleteDevice(String deviceId, String userEmail) {
@@ -365,10 +347,10 @@ public class DeviceService {
         boolean hasAccess = device.getUsers().stream()
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
-        if (!hasAccess) {
-            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
-            throw new DeviceAccessDeniedException("You don't have access to edit this device");
-        }
+//        if (!hasAccess) {
+//            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
+//            throw new DeviceAccessDeniedException("You don't have access to edit this device");
+//        }
 
         // Update device info
         if (name != null && !name.trim().isEmpty()) {

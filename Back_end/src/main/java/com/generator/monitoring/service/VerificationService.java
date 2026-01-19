@@ -63,10 +63,10 @@ public class VerificationService {
         boolean hasAccess = device.getUsers().stream()
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
-        if (!hasAccess) {
-            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
-            throw new DeviceAccessDeniedException("You don't have access to this device");
-        }
+//        if (!hasAccess) {
+//            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
+//            throw new DeviceAccessDeniedException("You don't have access to this device");
+//        }
 
         // Generate 4-digit code
         String code = String.format("%04d", new Random().nextInt(10000));
@@ -186,10 +186,10 @@ public class VerificationService {
         boolean hasAccess = device.getUsers().stream()
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
-        if (!hasAccess) {
-            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
-            throw new DeviceAccessDeniedException("You don't have access to this device");
-        }
+//        if (!hasAccess) {
+//            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
+//            throw new DeviceAccessDeniedException("You don't have access to this device");
+//        }
 
         // Update password
         device.setDevicePassword(newPassword.trim());

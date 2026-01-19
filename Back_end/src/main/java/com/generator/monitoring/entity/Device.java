@@ -15,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Device {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,11 +26,12 @@ public class Device {
     @Column
     private String devicePassword;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-        name = "device_users",
-        joinColumns = @JoinColumn(name = "device_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
+            name = "device_users",
+            joinColumns = @JoinColumn(name = "device_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> users = new HashSet<>();
 
@@ -50,5 +52,29 @@ public class Device {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    // ✅ ADD USER (SAFE)
+    public void addUser(User user) {
+        this.users.add(user);
+        user.getDevices().add(this);
+    }
+
+    public void removeUser(User user) {
+        this.users.remove(user);
+        user.getDevices().remove(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Device)) return false;
+        Device device = (Device) o;
+        return id != null && id.equals(device.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }
