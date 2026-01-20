@@ -9,98 +9,98 @@ export interface TelemetryData {
   timestamp: string;
 
   // RPM
-  rpm?: number;
+  RPM?: number;
 
   // Generator Power (Real Power)
-  generatorPL1?: number;
-  generatorPL2?: number;
-  generatorPL3?: number;
+  Generator_P_L1?: number;
+  Generator_P_L2?: number;
+  Generator_P_L3?: number;
 
   // Generator Reactive Power
-  generatorQ?: number;
-  generatorQL1?: number;
-  generatorQL2?: number;
-  generatorQL3?: number;
+  Generator_Q?: number;
+  Generator_Q_L1?: number;
+  Generator_Q_L2?: number;
+  Generator_Q_L3?: number;
 
   // Generator Apparent Power
-  generatorS?: number;
-  generatorSL1?: number;
-  generatorSL2?: number;
-  generatorSL3?: number;
+  Generator_S?: number;
+  Generator_S_L1?: number;
+  Generator_S_L2?: number;
+  Generator_S_L3?: number;
 
   // Generator Power Factor
-  generatorPowerFactor?: number;
+  Generator_Power_Factor?: number;
 
   // Generator Frequency
-  generatorFrequency?: number;
+  Generator_Frequency?: number;
 
   // Generator Voltage (Line to Neutral)
-  generatorVoltageL1N?: number;
-  generatorVoltageL2N?: number;
-  generatorVoltageL3N?: number;
+  Generator_Voltage_L1_N?: number;
+  Generator_Voltage_L2_N?: number;
+  Generator_Voltage_L3_N?: number;
 
   // Generator Voltage (Line to Line)
-  generatorVoltageL1L2?: number;
-  generatorVoltageL2L3?: number;
-  generatorVoltageL3L1?: number;
+  Generator_Voltage_L1_L2?: number;
+  Generator_Voltage_L2_L3?: number;
+  Generator_Voltage_L3_L1?: number;
 
   // Generator Current
-  generatorCurrentL1?: number;
-  generatorCurrentL2?: number;
-  generatorCurrentL3?: number;
+  Generator_Current_L1?: number;
+  Generator_Current_L2?: number;
+  Generator_Current_L3?: number;
 
   // Earth Fault Current
-  earthFaultCurrent?: number;
+  Earth_Fault_Current?: number;
 
   // Mains/Bus Frequency
-  mainsBusFrequency?: number;
+  Mains_Bus_Frequency?: number;
 
   // Mains/Bus Voltage (Line to Neutral)
-  mainsBusVoltageL1N?: number;
-  mainsBusVoltageL2N?: number;
-  mainsBusVoltageL3N?: number;
+  Mains_Bus_Voltage_L1_N?: number;
+  Mains_Bus_Voltage_L2_N?: number;
+  Mains_Bus_Voltage_L3_N?: number;
 
   // Mains/Bus Voltage (Line to Line)
-  mainsBusVoltageL1L2?: number;
-  mainsBusVoltageL2L3?: number;
-  mainsBusVoltageL3L1?: number;
+  Mains_Bus_Voltage_L1_L2?: number;
+  Mains_Bus_Voltage_L2_L3?: number;
+  Mains_Bus_Voltage_L3_L1?: number;
 
   // Mains Current
-  mainsL1Current?: number;
+  Mains_L1_Current?: number;
 
   // Mains Import
-  mainsImportP?: number;
-  mainsImportQ?: number;
+  Mains_Import_P?: number;
+  Mains_Import_Q?: number;
 
   // Mains Power Factor
-  mainsPF?: number;
+  Mains_PF?: number;
 
   // Vector Shift and ROCOF
-  maxVectorShift?: number;
-  rocof?: number;
-  maxRocof?: number;
+  Max_Vector_Shift?: number;
+  ROCOF?: number;
+  Max_ROCOF?: number;
 
   // Load
-  loadP?: number;
-  loadQ?: number;
-  loadPF?: number;
+  Load_P?: number;
+  Load_Q?: number;
+  Load_PF?: number;
 
   // Battery and D+
-  batteryVolts?: number;
-  dPlus?: number;
+  Battery_Volts?: number;
+  D_Plus?: number;
 
   // Oil
-  oilPressure?: number;
-  oilTemperature?: number;
+  Oil_Pressure?: number;
+  Oil_Temperature?: number;
 
   // Fuel Level
-  fuelLevel?: number;
+  Fuel_Level?: number;
 
   // E-STOP (Binary)
-  eStop?: boolean;
+  E_STOP?: boolean;
 
   // Alarm string from device
-  alarm?: string;
+  Alarm?: string;
 
   // Device alarms list (for compatibility)
   device_alarms?: string[];
