@@ -31,6 +31,7 @@ export default function LoginPage() {
 
   return (
     <div className="container mx-auto px-4 py-16">
+      <br /><br />
       <div className="max-w-md mx-auto">
         <div className="card">
           <h1 className="text-3xl font-bold mb-6 text-center">Login</h1>

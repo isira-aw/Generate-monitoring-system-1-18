@@ -18,8 +18,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <AuthProvider>
           <Navigation />
-          <br /><br />
-          <main className="min-h-screen">{children}</main>
+          <main>{children}</main>
         </AuthProvider>
       </body>
     </html>

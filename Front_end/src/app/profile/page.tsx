@@ -95,6 +95,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+            <br /><br />
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
 
