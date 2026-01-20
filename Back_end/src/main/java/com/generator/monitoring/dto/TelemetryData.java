@@ -1,5 +1,6 @@
 package com.generator.monitoring.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TelemetryData {
     private String deviceId;
     private LocalDateTime timestamp;
@@ -160,4 +162,37 @@ public class TelemetryData {
     // Device alarms list (for compatibility)
     @JsonProperty("device_alarms")
     private List<String> deviceAlarms;
+
+    // Backward compatibility setters for old MQTT format
+    // These methods map old field names to new structure
+
+    @JsonProperty("voltage")
+    public void setVoltage(Double voltage) {
+        // Map old 'voltage' to Generator Voltage L1-N
+        this.generatorVoltageL1N = voltage;
+    }
+
+    @JsonProperty("current")
+    public void setCurrent(Double current) {
+        // Map old 'current' to Generator Current L1
+        this.generatorCurrentL1 = current;
+    }
+
+    @JsonProperty("frequency")
+    public void setFrequency(Double frequency) {
+        // Map old 'frequency' to Generator Frequency
+        this.generatorFrequency = frequency;
+    }
+
+    @JsonProperty("power")
+    public void setPower(Double power) {
+        // Map old 'power' to Generator P L1
+        this.generatorPL1 = power;
+    }
+
+    @JsonProperty("temperature")
+    public void setTemperature(Double temperature) {
+        // Map old 'temperature' to Oil Temperature
+        this.oilTemperature = temperature;
+    }
 }
