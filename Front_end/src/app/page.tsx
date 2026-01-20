@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion ,Variants, easeOut} from 'framer-motion';
 import { gsap } from 'gsap';
 import { 
   Activity, Cpu, Phone, Layers, ChevronRight, 
@@ -11,9 +11,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { Zap, Twitter, Github, Linkedin, Mail } from "lucide-react";
-import { Variants, easeOut } from "framer-motion";
 import Link from 'next/link';
-
 
 // Animation variants for 3D-like feel
 

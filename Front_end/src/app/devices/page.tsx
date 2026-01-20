@@ -221,6 +221,7 @@ export default function DevicesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <br /><br />
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold">My Devices</h1>
         <button
@@ -254,73 +255,72 @@ export default function DevicesPage() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {devices.map((device) => (
-    <div
-      key={device.id}
-      className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 p-5 flex flex-col justify-between"
-    >
-      {/* Header */}
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800">{device.name}</h3>
-          <p className="text-sm text-gray-500 mt-1">ID: {device.deviceId}</p>
-        </div>
-        <span
-          className={`px-3 py-1 text-xs font-medium rounded-full ${
-            device.active
-              ? 'bg-green-100 text-green-800'
-              : 'bg-gray-100 text-gray-800'
-          }`}
-        >
-          {device.active ? 'Active' : 'Inactive'}
-        </span>
-      </div>
+          {devices.map((device) => (
+            <div
+              key={device.id}
+              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 p-5 flex flex-col justify-between"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800">{device.name}</h3>
+                  <p className="text-sm text-gray-500 mt-1">ID: {device.deviceId}</p>
+                </div>
+                <span
+                  className={`px-3 py-1 text-xs font-medium rounded-full ${device.active
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                    }`}
+                >
+                  {device.active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
 
-      {/* Location & Last Seen */}
-      <div className="mb-4">
-        <p className="text-gray-600">{device.location || 'Unknown location'}</p>
-        {device.lastSeenAt && (
-          <p className="text-sm text-gray-400 mt-1">
-            Last seen: {new Date(device.lastSeenAt).toLocaleString()}
-          </p>
-        )}
-      </div>
+              {/* Location & Last Seen */}
+              <div className="mb-4">
+                <p className="text-gray-600">{device.location || 'Unknown location'}</p>
+                {device.lastSeenAt && (
+                  <p className="text-sm text-gray-400 mt-1">
+                    Last seen: {new Date(device.lastSeenAt).toLocaleString()}
+                  </p>
+                )}
+              </div>
 
-      {/* Action Buttons */}
-      <div className="space-y-2">
-        <div className="flex gap-2">
-          <Link
-            href={`/device/${device.deviceId}/dashboard`}
-            className="flex-1 text-center py-2 px-4 btn btn-primary text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
-          >
-            Dashboard
-          </Link>
-          
+              {/* Action Buttons */}
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Link
+                    href={`/device/${device.deviceId}/dashboard`}
+                    className="flex-1 text-center py-2 px-4 btn btn-primary text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
+                  >
+                    Dashboard
+                  </Link>
+
+                </div>
+                <div className="flex gap-2">
+                  <Link
+                    href={`/device/${device.deviceId}/settings`}
+                    className="flex-1 text-center py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+                  >
+                    Thresholds
+                  </Link>
+                  <button
+                    onClick={() => handleEditDevice(device)}
+                    className="flex-1 py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDetachDevice(device.deviceId)}
+                    className="flex-1 py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
+                  >
+                    Detach
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="flex gap-2">
-          <Link
-            href={`/device/${device.deviceId}/settings`}
-            className="flex-1 text-center py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200"
-          >
-            Thresholds
-          </Link>
-          <button
-            onClick={() => handleEditDevice(device)}
-            className="flex-1 py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => handleDetachDevice(device.deviceId)}
-            className="flex-1 py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
-          >
-            Detach
-          </button>
-        </div>
-      </div>
-    </div>
-  ))}
-</div>
 
       )}
 
