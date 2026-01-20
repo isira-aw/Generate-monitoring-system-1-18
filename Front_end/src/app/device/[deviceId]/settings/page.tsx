@@ -358,7 +358,13 @@ function ThresholdEditor({
 
   const parameterName = threshold.parameter
     .split('_')
-    .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+    .map((word) => {
+      // Handle special acronyms
+      if (['RPM', 'PF', 'LN', 'LL', 'ROCOF', 'KW', 'KVAR', 'KVA', 'HZ'].includes(word)) {
+        return word;
+      }
+      return word.charAt(0) + word.slice(1).toLowerCase();
+    })
     .join(' ');
 
   return (
