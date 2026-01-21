@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { historyApi, deviceApi } from '@/lib/api';
 
@@ -15,6 +15,8 @@ interface HistoryDataPoint {
   parameters: Record<string, any>;
 }
 
+type SortDirection = 'asc' | 'desc' | null;
+
 export default function HistoryPage() {
   const params = useParams();
   const router = useRouter();
@@ -28,6 +30,12 @@ export default function HistoryPage() {
   const [historyData, setHistoryData] = useState<HistoryDataPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Filtering and sorting state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [recordLimit, setRecordLimit] = useState<number | null>(null);
 
   useEffect(() => {
     loadDeviceInfo();
@@ -93,6 +101,15 @@ export default function HistoryPage() {
     setSelectedParameters([]);
   };
 
+  // Calculate estimated record count based on time range
+  const getEstimatedRecordCount = () => {
+    if (!startDate || !endDate) return 0;
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+    const hours = (end - start) / (1000 * 60 * 60);
+    return Math.floor(hours * 3600); // Assuming 1 record per second
+  };
+
   const handleQuery = async () => {
     if (!startDate || !endDate) {
       setError('Please select both start and end dates');
@@ -101,6 +118,13 @@ export default function HistoryPage() {
 
     if (selectedParameters.length === 0) {
       setError('Please select at least one parameter');
+      return;
+    }
+
+    // Check if time range is too large
+    const estimatedRecords = getEstimatedRecordCount();
+    if (estimatedRecords > 50000) {
+      setError('Time range too large! Expected ' + estimatedRecords.toLocaleString() + ' records. Please select a shorter period (< 14 hours recommended).');
       return;
     }
 
@@ -119,6 +143,14 @@ export default function HistoryPage() {
       });
 
       setHistoryData(data);
+      setRecordLimit(null);
+
+      // Show warnings for large datasets
+      if (data.length > 10000) {
+        setError(`Warning: Large dataset (${data.length.toLocaleString()} records). Table may be slow. Consider narrowing your search.`);
+      } else if (data.length > 5000) {
+        setError(`Note: Retrieved ${data.length.toLocaleString()} records. PDF generation may be slow.`);
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load historical data');
     } finally {
@@ -130,6 +162,17 @@ export default function HistoryPage() {
     if (!startDate || !endDate || selectedParameters.length === 0) {
       setError('Please select dates and parameters first');
       return;
+    }
+
+    // Check if dataset is too large for PDF
+    if (historyData.length > 5000) {
+      const confirmed = window.confirm(
+        `Warning: You have ${historyData.length.toLocaleString()} records. ` +
+        `PDF generation may take 30+ seconds and produce a large file. ` +
+        `Recommended: < 1,000 records for optimal performance.\n\n` +
+        `Continue anyway?`
+      );
+      if (!confirmed) return;
     }
 
     setLoading(true);
@@ -159,6 +202,86 @@ export default function HistoryPage() {
       setLoading(false);
     }
   };
+
+  // Sorting handler
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      // Toggle sort direction
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortDirection(null);
+        setSortColumn(null);
+      } else {
+        setSortDirection('asc');
+      }
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  // Filtered and sorted data
+  const filteredAndSortedData = useMemo(() => {
+    let result = [...historyData];
+
+    // Apply search filter
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      result = result.filter((dataPoint) => {
+        // Search in timestamp
+        if (formatTimestamp(dataPoint.timestamp).toLowerCase().includes(lowerSearch)) {
+          return true;
+        }
+        // Search in parameter values
+        return selectedParameters.some((param) => {
+          const value = formatValue(dataPoint.parameters[param]);
+          return value.toLowerCase().includes(lowerSearch);
+        });
+      });
+    }
+
+    // Apply sorting
+    if (sortColumn && sortDirection) {
+      result.sort((a, b) => {
+        let aValue, bValue;
+
+        if (sortColumn === 'timestamp') {
+          aValue = new Date(a.timestamp).getTime();
+          bValue = new Date(b.timestamp).getTime();
+        } else {
+          aValue = a.parameters[sortColumn];
+          bValue = b.parameters[sortColumn];
+
+          // Handle null/undefined values
+          if (aValue === null || aValue === undefined) aValue = -Infinity;
+          if (bValue === null || bValue === undefined) bValue = -Infinity;
+
+          // Convert to numbers if possible
+          if (typeof aValue === 'number' && typeof bValue === 'number') {
+            // Already numbers
+          } else if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
+            aValue = aValue ? 1 : 0;
+            bValue = bValue ? 1 : 0;
+          } else {
+            aValue = String(aValue).toLowerCase();
+            bValue = String(bValue).toLowerCase();
+          }
+        }
+
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // Apply record limit if set
+    if (recordLimit && recordLimit > 0) {
+      result = result.slice(0, recordLimit);
+    }
+
+    return result;
+  }, [historyData, searchTerm, sortColumn, sortDirection, selectedParameters, recordLimit]);
 
   const formatValue = (value: any) => {
     if (value === null || value === undefined) return '-';
@@ -298,7 +421,11 @@ export default function HistoryPage() {
           </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div className={`mt-4 p-3 rounded ${
+              error.startsWith('Warning') || error.startsWith('Note')
+                ? 'bg-yellow-100 border border-yellow-400 text-yellow-800'
+                : 'bg-red-100 border border-red-400 text-red-700'
+            }`}>
               {error}
             </div>
           )}
@@ -307,45 +434,140 @@ export default function HistoryPage() {
         {/* Data Table */}
         {historyData.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Historical Data ({historyData.length} records)
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Historical Data
+              </h2>
+              <div className="text-sm text-gray-600">
+                Showing {filteredAndSortedData.length.toLocaleString()} of {historyData.length.toLocaleString()} records
+              </div>
+            </div>
+
+            {/* Filter Controls */}
+            <div className="mb-4 flex flex-wrap gap-4 items-end">
+              {/* Search */}
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Search / Filter
+                </label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search in all columns..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Record Limit */}
+              <div className="w-48">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Display Limit
+                </label>
+                <select
+                  value={recordLimit || ''}
+                  onChange={(e) => setRecordLimit(e.target.value ? parseInt(e.target.value) : null)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Records</option>
+                  <option value="100">100 records</option>
+                  <option value="500">500 records</option>
+                  <option value="1000">1,000 records</option>
+                  <option value="5000">5,000 records</option>
+                </select>
+              </div>
+
+              {/* Clear Filters */}
+              {(searchTerm || sortColumn || recordLimit) && (
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSortColumn(null);
+                    setSortDirection(null);
+                    setRecordLimit(null);
+                  }}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+
+            {/* Table */}
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Timestamp
+                    <th
+                      onClick={() => handleSort('timestamp')}
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Timestamp</span>
+                        {sortColumn === 'timestamp' && (
+                          <span className="text-blue-600">
+                            {sortDirection === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </div>
                     </th>
                     {selectedParameters.map((param) => (
                       <th
                         key={param}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        onClick={() => handleSort(param)}
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       >
-                        {availableParameters[param] || param}
+                        <div className="flex items-center space-x-1">
+                          <span>{availableParameters[param] || param}</span>
+                          {sortColumn === param && (
+                            <span className="text-blue-600">
+                              {sortDirection === 'asc' ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {historyData.map((dataPoint, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                        {formatTimestamp(dataPoint.timestamp)}
+                  {filteredAndSortedData.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={selectedParameters.length + 1}
+                        className="px-4 py-8 text-center text-gray-500"
+                      >
+                        No records match your filter criteria
                       </td>
-                      {selectedParameters.map((param) => (
-                        <td
-                          key={param}
-                          className="px-4 py-3 whitespace-nowrap text-sm text-gray-700"
-                        >
-                          {formatValue(dataPoint.parameters[param])}
-                        </td>
-                      ))}
                     </tr>
-                  ))}
+                  ) : (
+                    filteredAndSortedData.map((dataPoint, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                          {formatTimestamp(dataPoint.timestamp)}
+                        </td>
+                        {selectedParameters.map((param) => (
+                          <td
+                            key={param}
+                            className="px-4 py-3 whitespace-nowrap text-sm text-gray-700"
+                          >
+                            {formatValue(dataPoint.parameters[param])}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
+
+            {/* Performance Tip */}
+            {historyData.length > 1000 && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>💡 Tip:</strong> Use the search filter or display limit to improve table performance with large datasets.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
