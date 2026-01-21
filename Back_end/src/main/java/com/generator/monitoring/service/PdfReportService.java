@@ -2,6 +2,7 @@ package com.generator.monitoring.service;
 
 import com.generator.monitoring.dto.HistoryDataPoint;
 import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -39,20 +40,27 @@ public class PdfReportService {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf = new PdfDocument(writer);
+
+            // Use landscape orientation for better column visibility
+            int columnCount = parameters.size() + 1; // +1 for timestamp column
+            PageSize pageSize = columnCount > 6 ? PageSize.A4.rotate() : PageSize.A4;
+            pdf.setDefaultPageSize(pageSize);
+
             Document document = new Document(pdf);
+            document.setMargins(20, 20, 20, 20);
 
             // Add title
             Paragraph title = new Paragraph("Generator Monitoring Report")
-                    .setFontSize(20)
+                    .setFontSize(16)
                     .setBold()
                     .setTextAlignment(TextAlignment.CENTER);
             document.add(title);
 
             // Add device info and time range
-            document.add(new Paragraph("Device ID: " + deviceId).setFontSize(12));
+            document.add(new Paragraph("Device ID: " + deviceId).setFontSize(9));
             document.add(new Paragraph("Report Period: " + startTime.format(DATE_FORMATTER) +
-                    " to " + endTime.format(DATE_FORMATTER)).setFontSize(12));
-            document.add(new Paragraph("\n"));
+                    " to " + endTime.format(DATE_FORMATTER)).setFontSize(9));
+            document.add(new Paragraph("\n").setFontSize(6));
 
             // Get parameter display names
             Map<String, String> displayNames = historyService.getParameterDisplayNames();
@@ -61,38 +69,59 @@ public class PdfReportService {
             List<HistoryDataPoint> dataPoints = historyService.queryHistory(deviceId, startTime, endTime, parameters);
 
             if (dataPoints.isEmpty()) {
-                document.add(new Paragraph("No data available for the specified period."));
+                document.add(new Paragraph("No data available for the specified period.").setFontSize(10));
             } else {
-                // Create table
-                int columnCount = parameters.size() + 1; // +1 for timestamp column
-                Table table = new Table(UnitValue.createPercentArray(columnCount)).useAllAvailableWidth();
+                // Determine font size based on number of columns
+                int headerFontSize = columnCount > 10 ? 6 : (columnCount > 6 ? 7 : 8);
+                int cellFontSize = columnCount > 10 ? 5 : (columnCount > 6 ? 6 : 7);
 
-                // Add header row
-                Cell headerCell = new Cell().add(new Paragraph("Timestamp").setBold())
+                // Create table with equal column widths
+                Table table = new Table(UnitValue.createPercentArray(columnCount)).useAllAvailableWidth();
+                table.setFontSize(cellFontSize);
+
+                // Add header row - Timestamp column
+                Cell headerCell = new Cell()
+                        .add(new Paragraph("Timestamp").setFontSize(headerFontSize).setBold())
                         .setBackgroundColor(ColorConstants.LIGHT_GRAY)
-                        .setTextAlignment(TextAlignment.CENTER);
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setPadding(3);
                 table.addHeaderCell(headerCell);
 
+                // Add header row - Parameter columns
                 for (String param : parameters) {
                     String displayName = displayNames.getOrDefault(param, param);
-                    headerCell = new Cell().add(new Paragraph(displayName).setBold())
+                    // Wrap long header text
+                    Paragraph headerParagraph = new Paragraph(displayName)
+                            .setFontSize(headerFontSize)
+                            .setBold();
+
+                    headerCell = new Cell()
+                            .add(headerParagraph)
                             .setBackgroundColor(ColorConstants.LIGHT_GRAY)
-                            .setTextAlignment(TextAlignment.CENTER);
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(3);
                     table.addHeaderCell(headerCell);
                 }
 
                 // Add data rows
                 for (HistoryDataPoint dataPoint : dataPoints) {
-                    // Add timestamp
-                    table.addCell(new Cell().add(new Paragraph(dataPoint.getTimestamp().format(DATE_FORMATTER)))
-                            .setTextAlignment(TextAlignment.CENTER));
+                    // Add timestamp cell
+                    String timestamp = dataPoint.getTimestamp().format(DATE_FORMATTER);
+                    Cell timestampCell = new Cell()
+                            .add(new Paragraph(timestamp).setFontSize(cellFontSize))
+                            .setTextAlignment(TextAlignment.CENTER)
+                            .setPadding(2);
+                    table.addCell(timestampCell);
 
-                    // Add parameter values
+                    // Add parameter value cells
                     for (String param : parameters) {
                         Object value = dataPoint.getParameters().get(param);
                         String displayValue = formatValue(value);
-                        table.addCell(new Cell().add(new Paragraph(displayValue))
-                                .setTextAlignment(TextAlignment.CENTER));
+                        Cell valueCell = new Cell()
+                                .add(new Paragraph(displayValue).setFontSize(cellFontSize))
+                                .setTextAlignment(TextAlignment.CENTER)
+                                .setPadding(2);
+                        table.addCell(valueCell);
                     }
                 }
 
@@ -100,13 +129,14 @@ public class PdfReportService {
             }
 
             // Add footer
-            document.add(new Paragraph("\n"));
+            document.add(new Paragraph("\n").setFontSize(6));
             document.add(new Paragraph("Generated on: " + LocalDateTime.now().format(DATE_FORMATTER))
-                    .setFontSize(10)
+                    .setFontSize(8)
                     .setTextAlignment(TextAlignment.RIGHT));
 
             document.close();
-            logger.info("PDF report generated for device: {} with {} data points", deviceId, dataPoints.size());
+            logger.info("PDF report generated for device: {} with {} data points and {} columns",
+                    deviceId, dataPoints.size(), columnCount);
 
             return baos.toByteArray();
         } catch (Exception e) {
