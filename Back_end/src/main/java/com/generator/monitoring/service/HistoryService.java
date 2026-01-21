@@ -5,6 +5,8 @@ import com.generator.monitoring.entity.Device;
 import com.generator.monitoring.entity.TelemetryHistory;
 import com.generator.monitoring.repository.DeviceRepository;
 import com.generator.monitoring.repository.TelemetryHistoryRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class HistoryService {
+
+    private static final Logger logger = LoggerFactory.getLogger(HistoryService.class);
 
     @Autowired
     private TelemetryHistoryRepository telemetryHistoryRepository;
@@ -28,11 +32,22 @@ public class HistoryService {
      */
     public List<HistoryDataPoint> queryHistory(String deviceId, LocalDateTime startTime,
                                                LocalDateTime endTime, List<String> parameters) {
+        logger.info("Querying history for device: {}, startTime: {}, endTime: {}", deviceId, startTime, endTime);
+
         Device device = deviceRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
 
+        logger.info("Device found: {}, id: {}", device.getName(), device.getId());
+
         List<TelemetryHistory> historyRecords = telemetryHistoryRepository
                 .findByDeviceAndTimeRange(device, startTime, endTime);
+
+        logger.info("Found {} history records for device: {}", historyRecords.size(), deviceId);
+
+        if (historyRecords.isEmpty()) {
+            logger.warn("No history records found for device: {} in time range {} to {}",
+                    deviceId, startTime, endTime);
+        }
 
         return historyRecords.stream()
                 .map(record -> convertToDataPoint(record, parameters))

@@ -5,6 +5,8 @@ import com.generator.monitoring.dto.HistoryQueryRequest;
 import com.generator.monitoring.service.HistoryService;
 import com.generator.monitoring.service.PdfReportService;
 import com.generator.monitoring.service.TelemetryCleanupService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +24,8 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class HistoryController {
 
+    private static final Logger logger = LoggerFactory.getLogger(HistoryController.class);
+
     @Autowired
     private HistoryService historyService;
 
@@ -37,14 +41,24 @@ public class HistoryController {
     @PostMapping("/query")
     public ResponseEntity<List<HistoryDataPoint>> queryHistory(@RequestBody HistoryQueryRequest request) {
         try {
+            LocalDateTime startTime = request.getParsedStartTime();
+            LocalDateTime endTime = request.getParsedEndTime();
+
+            logger.info("Querying history for device: {}, startTime: {}, endTime: {}, parameters: {}",
+                    request.getDeviceId(), startTime, endTime,
+                    request.getParameters() != null ? request.getParameters().size() : 0);
+
             List<HistoryDataPoint> dataPoints = historyService.queryHistory(
                     request.getDeviceId(),
-                    request.getStartTime(),
-                    request.getEndTime(),
+                    startTime,
+                    endTime,
                     request.getParameters()
             );
+
+            logger.info("Found {} data points for device: {}", dataPoints.size(), request.getDeviceId());
             return ResponseEntity.ok(dataPoints);
         } catch (Exception e) {
+            logger.error("Error querying history for device {}: {}", request.getDeviceId(), e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -74,10 +88,16 @@ public class HistoryController {
     @PostMapping("/report/pdf")
     public ResponseEntity<byte[]> generatePdfReport(@RequestBody HistoryQueryRequest request) {
         try {
+            LocalDateTime startTime = request.getParsedStartTime();
+            LocalDateTime endTime = request.getParsedEndTime();
+
+            logger.info("Generating PDF report for device: {}, startTime: {}, endTime: {}",
+                    request.getDeviceId(), startTime, endTime);
+
             byte[] pdfBytes = pdfReportService.generateReport(
                     request.getDeviceId(),
-                    request.getStartTime(),
-                    request.getEndTime(),
+                    startTime,
+                    endTime,
                     request.getParameters()
             );
 
@@ -87,8 +107,12 @@ public class HistoryController {
                     "generator_report_" + request.getDeviceId() + "_" +
                             System.currentTimeMillis() + ".pdf");
 
+            logger.info("PDF report generated successfully for device: {}, size: {} bytes",
+                    request.getDeviceId(), pdfBytes.length);
+
             return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
         } catch (Exception e) {
+            logger.error("Error generating PDF report for device {}: {}", request.getDeviceId(), e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
