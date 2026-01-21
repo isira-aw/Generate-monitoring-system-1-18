@@ -155,3 +155,62 @@ export const profileApi = {
     return response.data;
   },
 };
+
+// History API
+export const historyApi = {
+  queryHistory: async (data: {
+    deviceId: string;
+    startTime: string;
+    endTime: string;
+    parameters?: string[];
+  }) => {
+    const response = await api.post('/api/history/query', data);
+    return response.data;
+  },
+
+  getHistory: async (
+    deviceId: string,
+    startTime: string,
+    endTime: string,
+    parameters?: string[]
+  ) => {
+    const params = new URLSearchParams({
+      startTime,
+      endTime,
+    });
+    if (parameters && parameters.length > 0) {
+      parameters.forEach(param => params.append('parameters', param));
+    }
+    const response = await api.get(
+      `/api/history/data/${deviceId}?${params.toString()}`
+    );
+    return response.data;
+  },
+
+  generatePdfReport: async (data: {
+    deviceId: string;
+    startTime: string;
+    endTime: string;
+    parameters: string[];
+  }) => {
+    const response = await api.post('/api/history/report/pdf', data, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  getParameters: async () => {
+    const response = await api.get('/api/history/parameters');
+    return response.data;
+  },
+
+  getOldRecordsCount: async () => {
+    const response = await api.get('/api/history/cleanup/count');
+    return response.data;
+  },
+
+  triggerCleanup: async () => {
+    const response = await api.post('/api/history/cleanup');
+    return response.data;
+  },
+};

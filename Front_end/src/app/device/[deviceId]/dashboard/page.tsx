@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useWebSocket } from '@/lib/useWebSocket';
 import { deviceApi } from '@/lib/api';
 
@@ -23,6 +23,7 @@ interface HistoricalData {
 
 export default function DashboardPage() {
   const params = useParams();
+  const router = useRouter();
   const deviceId = params.deviceId as string;
   const { data, connected } = useWebSocket(deviceId);
   const [device, setDevice] = useState<Device | null>(null);
@@ -228,6 +229,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen lg:h-screen bg-gradient-to-br from-gray-50 to-gray-100 lg:overflow-hidden">
+      <br /><br />
       <div className="h-full flex flex-col p-3 lg:p-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 lg:mb-4">
@@ -237,6 +239,15 @@ export default function DashboardPage() {
             <span className={`px-2.5 py-1 text-xs font-semibold rounded-full shadow-sm ${connected ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
               {connected ? '● Live' : '○ Offline'}
             </span>
+            <button
+              onClick={() => router.push(`/device/${deviceId}/history`)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Documents and History
+            </button>
           </div>
           {telemetry && (
             <div className="text-left sm:text-right bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
