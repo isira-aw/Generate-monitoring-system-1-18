@@ -229,6 +229,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen lg:h-screen bg-gradient-to-br from-gray-50 to-gray-100 lg:overflow-hidden">
+      <br /><br />
       <div className="h-full flex flex-col p-3 lg:p-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 lg:mb-4">

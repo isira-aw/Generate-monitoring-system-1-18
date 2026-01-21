@@ -173,6 +173,7 @@ export default function HistoryPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
+      <br /><br />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
