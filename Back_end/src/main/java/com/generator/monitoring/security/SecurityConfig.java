@@ -66,6 +66,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/devices/register").permitAll()
                         .requestMatchers("/api/devices").permitAll()
                         .requestMatchers("/api/devices/*/dashboard").permitAll()
+                        .requestMatchers("/api/history/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
