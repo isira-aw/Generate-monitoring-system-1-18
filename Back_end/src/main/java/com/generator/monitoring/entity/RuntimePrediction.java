@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "runtime_predictions", indexes = {
-        @Index(name = "idx_device_timestamp", columnList = "device_id,predicted_at")
+        @Index(name = "idx_prediction_device_time", columnList = "device_id,predicted_at")
 })
 @Data
 @NoArgsConstructor
