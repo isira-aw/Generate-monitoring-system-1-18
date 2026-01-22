@@ -16,4 +16,11 @@ public class DeviceDto {
     private String location;
     private Boolean active;
     private LocalDateTime lastSeenAt;
+
+    // Device Specifications for Runtime Prediction
+    private Double fuelTankCapacityLiters;
+    private Double generatorCapacityKw;
+    private Double batteryCapacityAh;
+    private Double batteryVoltageNominal;
+    private String fuelType;
 }

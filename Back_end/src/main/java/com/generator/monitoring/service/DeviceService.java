@@ -367,14 +367,76 @@ public class DeviceService {
         return mapToDto(saved);
     }
 
+    @Transactional
+    public DeviceDto updateDeviceSpecs(String deviceId, Double fuelTankCapacityLiters,
+                                       Double generatorCapacityKw, Double batteryCapacityAh,
+                                       Double batteryVoltageNominal, String fuelType,
+                                       String userEmail) {
+        logger.info("Updating device specs for device ID: {} by user: {}", deviceId, userEmail);
+
+        if (deviceId == null || deviceId.trim().isEmpty()) {
+            throw new InvalidInputException("Device ID cannot be empty");
+        }
+
+        if (userEmail == null || userEmail.trim().isEmpty()) {
+            throw new InvalidInputException("User email cannot be empty");
+        }
+
+        final String finalDeviceId = deviceId.trim();
+        final String finalUserEmail = userEmail.trim();
+
+        Device device = deviceRepository.findByDeviceId(finalDeviceId)
+                .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + finalDeviceId));
+
+        User user = userRepository.findByEmail(finalUserEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + finalUserEmail));
+
+        // Check if user has access to this device
+        boolean hasAccess = device.getUsers().stream()
+                .anyMatch(u -> u.getId().equals(user.getId()));
+
+        if (!hasAccess) {
+            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
+            throw new DeviceAccessDeniedException("You don't have access to edit this device");
+        }
+
+        // Update device specifications
+        if (fuelTankCapacityLiters != null) {
+            device.setFuelTankCapacityLiters(fuelTankCapacityLiters);
+        }
+        if (generatorCapacityKw != null) {
+            device.setGeneratorCapacityKw(generatorCapacityKw);
+        }
+        if (batteryCapacityAh != null) {
+            device.setBatteryCapacityAh(batteryCapacityAh);
+        }
+        if (batteryVoltageNominal != null) {
+            device.setBatteryVoltageNominal(batteryVoltageNominal);
+        }
+        if (fuelType != null && !fuelType.trim().isEmpty()) {
+            device.setFuelType(fuelType.trim());
+        }
+
+        Device saved = deviceRepository.save(device);
+
+        logger.info("Successfully updated device specs for device ID: {}", finalDeviceId);
+
+        return mapToDto(saved);
+    }
+
     private DeviceDto mapToDto(Device device) {
-        return new DeviceDto(
-                device.getId(),
-                device.getDeviceId(),
-                device.getName(),
-                device.getLocation(),
-                device.getActive(),
-                device.getLastSeenAt()
-        );
+        DeviceDto dto = new DeviceDto();
+        dto.setId(device.getId());
+        dto.setDeviceId(device.getDeviceId());
+        dto.setName(device.getName());
+        dto.setLocation(device.getLocation());
+        dto.setActive(device.getActive());
+        dto.setLastSeenAt(device.getLastSeenAt());
+        dto.setFuelTankCapacityLiters(device.getFuelTankCapacityLiters());
+        dto.setGeneratorCapacityKw(device.getGeneratorCapacityKw());
+        dto.setBatteryCapacityAh(device.getBatteryCapacityAh());
+        dto.setBatteryVoltageNominal(device.getBatteryVoltageNominal());
+        dto.setFuelType(device.getFuelType());
+        return dto;
     }
 }

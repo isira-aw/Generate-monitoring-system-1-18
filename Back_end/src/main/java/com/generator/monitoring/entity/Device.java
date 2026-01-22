@@ -49,6 +49,22 @@ public class Device {
     @Column
     private LocalDateTime lastSeenAt;
 
+    // Device Specifications for Runtime Prediction
+    @Column
+    private Double fuelTankCapacityLiters;
+
+    @Column
+    private Double generatorCapacityKw;
+
+    @Column
+    private Double batteryCapacityAh;
+
+    @Column
+    private Double batteryVoltageNominal; // e.g., 12.0 or 24.0
+
+    @Column
+    private String fuelType; // e.g., "Diesel", "Petrol"
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

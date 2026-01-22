@@ -235,4 +235,56 @@ public class DeviceController {
         DeviceDto device = deviceService.updateDeviceInfo(deviceId, name, location, userEmail);
         return ResponseEntity.ok(device);
     }
+
+    @PutMapping("/{deviceId}/specs")
+    public ResponseEntity<DeviceDto> updateDeviceSpecs(
+            @PathVariable String deviceId,
+            @RequestBody Map<String, Object> specsData,
+            Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String userEmail = authentication.getName();
+
+        // Parse specs from request
+        Double fuelTankCapacityLiters = specsData.containsKey("fuelTankCapacityLiters") ?
+                ((Number) specsData.get("fuelTankCapacityLiters")).doubleValue() : null;
+        Double generatorCapacityKw = specsData.containsKey("generatorCapacityKw") ?
+                ((Number) specsData.get("generatorCapacityKw")).doubleValue() : null;
+        Double batteryCapacityAh = specsData.containsKey("batteryCapacityAh") ?
+                ((Number) specsData.get("batteryCapacityAh")).doubleValue() : null;
+        Double batteryVoltageNominal = specsData.containsKey("batteryVoltageNominal") ?
+                ((Number) specsData.get("batteryVoltageNominal")).doubleValue() : null;
+        String fuelType = (String) specsData.get("fuelType");
+
+        DeviceDto device = deviceService.updateDeviceSpecs(
+                deviceId,
+                fuelTankCapacityLiters,
+                generatorCapacityKw,
+                batteryCapacityAh,
+                batteryVoltageNominal,
+                fuelType,
+                userEmail
+        );
+
+        return ResponseEntity.ok(device);
+    }
+
+    @GetMapping("/{deviceId}/specs")
+    public ResponseEntity<Map<String, Object>> getDeviceSpecs(@PathVariable String deviceId) {
+        // Public endpoint - no authentication required (for AI Support page)
+        DeviceDto device = deviceService.getDeviceByDeviceId(deviceId);
+
+        Map<String, Object> specs = Map.of(
+                "fuelTankCapacityLiters", device.getFuelTankCapacityLiters() != null ? device.getFuelTankCapacityLiters() : 0,
+                "generatorCapacityKw", device.getGeneratorCapacityKw() != null ? device.getGeneratorCapacityKw() : 0,
+                "batteryCapacityAh", device.getBatteryCapacityAh() != null ? device.getBatteryCapacityAh() : 0,
+                "batteryVoltageNominal", device.getBatteryVoltageNominal() != null ? device.getBatteryVoltageNominal() : 0,
+                "fuelType", device.getFuelType() != null ? device.getFuelType() : ""
+        );
+
+        return ResponseEntity.ok(specs);
+    }
 }
