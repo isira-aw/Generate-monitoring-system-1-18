@@ -45,12 +45,16 @@ public class PredictionController {
                     response.put("generator", convertToResponse(generatorPrediction));
                 } else {
                     response.put("generator", null);
-                    response.put("generatorMessage", "Insufficient data or device specs not configured");
+                    response.put("generatorMessage", "Unable to generate prediction");
                 }
-            } catch (Exception e) {
-                logger.error("Error predicting generator runtime: {}", e.getMessage());
+            } catch (RuntimeException e) {
+                logger.warn("Could not predict generator runtime: {}", e.getMessage());
                 response.put("generator", null);
-                response.put("generatorError", e.getMessage());
+                response.put("generatorMessage", e.getMessage());
+            } catch (Exception e) {
+                logger.error("Error predicting generator runtime: {}", e.getMessage(), e);
+                response.put("generator", null);
+                response.put("generatorMessage", "Prediction error: " + e.getMessage());
             }
 
             // Get battery prediction
