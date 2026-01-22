@@ -48,6 +48,7 @@ public class RuntimePredictionService {
 
     /**
      * Predict generator runtime based on current fuel level
+     * Uses percentage-based calculation - no tank capacity required!
      * @param deviceId Device identifier
      * @return RuntimePrediction entity with prediction details
      */
@@ -58,48 +59,47 @@ public class RuntimePredictionService {
         Device device = deviceRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
 
-        // Check device specifications first
-        if (device.getFuelTankCapacityLiters() == null || device.getFuelTankCapacityLiters() <= 0) {
-            logger.warn("Device {} has no fuel tank capacity configured", deviceId);
-            throw new RuntimeException("Fuel tank capacity not configured. Please update device specifications.");
-        }
-
-        // Get current fuel level
+        // Get current fuel level (REQUIRED - only thing we need!)
         Double currentFuelPercent = fuelAnalysisService.getCurrentFuelLevel(deviceId);
         if (currentFuelPercent == null || currentFuelPercent <= 0) {
             logger.warn("No fuel level data available for device: {}", deviceId);
             throw new RuntimeException("No recent fuel level data available. Please ensure device is sending telemetry.");
         }
 
-        // Calculate fuel remaining in liters
-        double fuelRemainingLiters = (currentFuelPercent / 100.0) * device.getFuelTankCapacityLiters();
-
-        // Calculate fuel burn rate with adaptive approach
-        Double fuelBurnRateLh = null;
+        // Calculate fuel burn rate in % per hour (doesn't need tank capacity!)
+        Double fuelBurnRatePercentPerHour = null;
+        Double fuelBurnRateLitersPerHour = null;
         boolean usingEstimatedRate = false;
+        boolean usingPercentageBased = true;
 
-        // Try adaptive calculation first (tries multiple time windows)
-        fuelBurnRateLh = fuelAnalysisService.calculateFuelBurnRateAdaptive(deviceId);
+        // Try adaptive percentage-based calculation first (NO TANK CAPACITY NEEDED)
+        fuelBurnRatePercentPerHour = fuelAnalysisService.calculateFuelBurnRatePercentAdaptive(deviceId);
 
-        if (fuelBurnRateLh == null || fuelBurnRateLh <= 0) {
-            // Try estimation based on generator specs and load
-            logger.info("Adaptive calculation failed, trying estimation based on specs");
-            fuelBurnRateLh = fuelAnalysisService.estimateFuelBurnRate(deviceId);
+        if (fuelBurnRatePercentPerHour == null || fuelBurnRatePercentPerHour <= 0) {
+            // Try estimation based on efficiency
+            logger.info("Adaptive % calculation failed, trying estimation based on efficiency");
+            fuelBurnRatePercentPerHour = fuelAnalysisService.estimateFuelBurnRatePercent(deviceId);
             usingEstimatedRate = true;
 
-            if (fuelBurnRateLh == null || fuelBurnRateLh <= 0) {
-                // Last resort: use conservative default
-                logger.warn("Estimation also failed, using conservative default: {} L/h", DEFAULT_FUEL_BURN_RATE_LH);
-                fuelBurnRateLh = DEFAULT_FUEL_BURN_RATE_LH;
+            if (fuelBurnRatePercentPerHour == null || fuelBurnRatePercentPerHour <= 0) {
+                // Last resort: use default 5% per hour (20 hours runtime at 100%)
+                logger.warn("Estimation also failed, using conservative default: 5% per hour");
+                fuelBurnRatePercentPerHour = 5.0;
                 usingEstimatedRate = true;
             }
         }
 
+        // Physics-based prediction: runtime = current_fuel_% / burn_rate_%_per_hour
+        double rawRuntimeHours = currentFuelPercent / fuelBurnRatePercentPerHour;
+
+        // If tank capacity is known, also calculate L/h for display
+        if (device.getFuelTankCapacityLiters() != null && device.getFuelTankCapacityLiters() > 0) {
+            fuelBurnRateLitersPerHour = (fuelBurnRatePercentPerHour / 100.0) * device.getFuelTankCapacityLiters();
+            logger.info("Tank capacity known, calculated burn rate: {} L/h", fuelBurnRateLitersPerHour);
+        }
+
         // Calculate average load
         Double avgLoadKw = fuelAnalysisService.calculateAverageLoad(deviceId, 1);
-
-        // Physics-based prediction: raw runtime = fuel remaining / burn rate
-        double rawRuntimeHours = fuelRemainingLiters / fuelBurnRateLh;
 
         // Get correction factor
         PredictionCorrectionFactors correctionFactors = getCorrectionFactors(deviceId);
@@ -124,7 +124,7 @@ public class RuntimePredictionService {
         prediction.setFuelLevelPercent(currentFuelPercent);
         prediction.setAvgLoadKw(avgLoadKw);
         prediction.setRawPredictedRuntimeHours(rawRuntimeHours);
-        prediction.setFuelBurnRateLitersPerHour(fuelBurnRateLh);
+        prediction.setFuelBurnRateLitersPerHour(fuelBurnRateLitersPerHour); // May be null if tank capacity unknown
         prediction.setCorrectionFactor(correctionFactor);
         prediction.setPredictedRuntimeHours(predictedRuntimeHours);
         prediction.setConfidenceScore(confidence);
@@ -142,8 +142,8 @@ public class RuntimePredictionService {
         correctionFactors.setGeneratorPredictionCount(correctionFactors.getGeneratorPredictionCount() + 1);
         correctionFactorsRepository.save(correctionFactors);
 
-        logger.info("Generator runtime predicted: {} hours (raw: {} h, correction: {}x, confidence: {})",
-                predictedRuntimeHours, rawRuntimeHours, correctionFactor, confidence);
+        logger.info("Generator runtime predicted: {} hours (fuel: {}%, burn rate: {}%/h, raw: {} h, correction: {}x, confidence: {})",
+                predictedRuntimeHours, currentFuelPercent, fuelBurnRatePercentPerHour, rawRuntimeHours, correctionFactor, confidence);
 
         return prediction;
     }

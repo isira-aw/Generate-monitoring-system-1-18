@@ -308,10 +308,17 @@ export default function AISupportPage() {
                   <span>Current Fuel Level:</span>
                   <span className="font-semibold">{predictions.generator.fuelLevelPercent?.toFixed(1)}%</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Fuel Burn Rate:</span>
-                  <span className="font-semibold">{predictions.generator.fuelBurnRateLh?.toFixed(2)} L/h</span>
-                </div>
+                {predictions.generator.fuelBurnRateLh ? (
+                  <div className="flex justify-between">
+                    <span>Fuel Burn Rate:</span>
+                    <span className="font-semibold">{predictions.generator.fuelBurnRateLh.toFixed(2)} L/h</span>
+                  </div>
+                ) : (
+                  <div className="flex justify-between">
+                    <span>Calculation Method:</span>
+                    <span className="font-semibold text-blue-600">Percentage-based</span>
+                  </div>
+                )}
                 {predictions.generator.avgLoadKw && (
                   <div className="flex justify-between">
                     <span>Average Load:</span>
@@ -322,12 +329,17 @@ export default function AISupportPage() {
                   <span>AI Correction Factor:</span>
                   <span className="font-semibold">{predictions.generator.correctionFactor.toFixed(3)}x</span>
                 </div>
+                {!predictions.generator.fuelBurnRateLh && (
+                  <div className="mt-3 p-2 bg-blue-50 rounded text-xs text-blue-700">
+                    Using efficiency-based calculation. Configure tank capacity in settings for more detailed metrics.
+                  </div>
+                )}
               </div>
             </>
           ) : (
             <div className="text-center py-12">
               <p className="text-gray-500">{predictions?.generatorMessage || 'No prediction available'}</p>
-              <p className="text-sm text-gray-400 mt-2">Configure device specifications to enable predictions</p>
+              <p className="text-sm text-gray-400 mt-2">Ensure device is sending telemetry data</p>
             </div>
           )}
         </div>

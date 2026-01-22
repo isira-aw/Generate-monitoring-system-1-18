@@ -29,7 +29,86 @@ public class FuelAnalysisService {
     private DeviceRepository deviceRepository;
 
     /**
-     * Calculate fuel burn rate in liters per hour
+     * Calculate fuel burn rate in percentage per hour (doesn't require tank capacity)
+     * This is the primary method - works with any generator
+     * @param deviceId Device identifier
+     * @param analysisWindowHours Time window to analyze
+     * @return Fuel burn rate in % per hour, or null if insufficient data
+     */
+    public Double calculateFuelBurnRatePercent(String deviceId, Integer analysisWindowHours) {
+        logger.info("Calculating fuel burn rate (% per hour) for device: {}", deviceId);
+
+        Device device = deviceRepository.findByDeviceId(deviceId)
+                .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
+
+        int windowHours = (analysisWindowHours != null) ? analysisWindowHours : DEFAULT_ANALYSIS_WINDOW_HOURS;
+        LocalDateTime startTime = LocalDateTime.now().minusHours(windowHours);
+        LocalDateTime endTime = LocalDateTime.now();
+
+        List<TelemetryHistory> records = telemetryHistoryRepository
+                .findByDeviceAndTimeRange(device, startTime, endTime);
+
+        if (records.isEmpty() || records.size() < MIN_DATA_POINTS) {
+            logger.warn("Insufficient data points for fuel burn rate calculation: {} records", records.size());
+            return null;
+        }
+
+        // Sort by timestamp ascending
+        records.sort((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()));
+
+        // Get first and last valid readings
+        TelemetryHistory firstReading = null;
+        TelemetryHistory lastReading = null;
+
+        for (TelemetryHistory record : records) {
+            if (record.getFuelLevel() != null && record.getFuelLevel() > 0) {
+                if (firstReading == null) {
+                    firstReading = record;
+                }
+                lastReading = record;
+            }
+        }
+
+        if (firstReading == null || lastReading == null || firstReading.equals(lastReading)) {
+            logger.warn("No valid fuel level readings found in time range");
+            return null;
+        }
+
+        double fuelChangePercent = firstReading.getFuelLevel() - lastReading.getFuelLevel();
+
+        // Ignore if fuel didn't change significantly
+        if (Math.abs(fuelChangePercent) < MIN_FUEL_CHANGE_THRESHOLD) {
+            logger.info("Fuel level change too small ({} %), considering stable", fuelChangePercent);
+            return null;
+        }
+
+        // Check for refueling (fuel level increased)
+        if (fuelChangePercent < 0) {
+            logger.info("Fuel level increased - possible refueling detected, cannot calculate burn rate");
+            return null;
+        }
+
+        // Calculate time difference in hours
+        Duration duration = Duration.between(firstReading.getTimestamp(), lastReading.getTimestamp());
+        double hoursElapsed = duration.toMinutes() / 60.0;
+
+        if (hoursElapsed < 0.1) { // Less than 6 minutes
+            logger.warn("Time window too small: {} hours", hoursElapsed);
+            return null;
+        }
+
+        // Calculate burn rate in % per hour
+        double burnRatePercentPerHour = fuelChangePercent / hoursElapsed;
+
+        logger.info("Fuel burn rate calculated: {}% per hour (fuel change: {}%, time: {} h)",
+                burnRatePercentPerHour, fuelChangePercent, hoursElapsed);
+
+        return burnRatePercentPerHour;
+    }
+
+    /**
+     * Calculate fuel burn rate in liters per hour (requires tank capacity)
+     * This is more accurate when tank capacity is known
      * @param deviceId Device identifier
      * @param analysisWindowHours Time window to analyze (default 2 hours)
      * @return Fuel burn rate in L/h, or null if insufficient data
@@ -249,13 +328,80 @@ public class FuelAnalysisService {
     }
 
     /**
-     * Calculate fuel burn rate with adaptive time window
+     * Calculate fuel burn rate with adaptive time window (percentage-based)
+     * Tries progressively shorter windows: 2h -> 1h -> 30m -> 15m
+     * This doesn't require tank capacity - works with any generator!
+     * @param deviceId Device identifier
+     * @return Fuel burn rate in % per hour, or null if no data available
+     */
+    public Double calculateFuelBurnRatePercentAdaptive(String deviceId) {
+        logger.info("Calculating fuel burn rate (% per hour) with adaptive window for device: {}", deviceId);
+
+        // Try different time windows
+        int[] windows = {2, 1}; // hours
+        for (int windowHours : windows) {
+            Double burnRate = calculateFuelBurnRatePercent(deviceId, windowHours);
+            if (burnRate != null && burnRate > 0) {
+                logger.info("Adaptive calculation succeeded with {} hour window: {}% per hour", windowHours, burnRate);
+                return burnRate;
+            }
+        }
+
+        // Try shorter windows in minutes
+        int[] minuteWindows = {30, 15};
+        Device device = deviceRepository.findByDeviceId(deviceId)
+                .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
+
+        for (int minutes : minuteWindows) {
+            LocalDateTime startTime = LocalDateTime.now().minusMinutes(minutes);
+            LocalDateTime endTime = LocalDateTime.now();
+
+            List<TelemetryHistory> records = telemetryHistoryRepository
+                    .findByDeviceAndTimeRange(device, startTime, endTime);
+
+            if (records.size() >= 2) {
+                records.sort((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()));
+
+                TelemetryHistory first = records.get(0);
+                TelemetryHistory last = records.get(records.size() - 1);
+
+                if (first.getFuelLevel() != null && last.getFuelLevel() != null) {
+                    double fuelChange = first.getFuelLevel() - last.getFuelLevel();
+                    if (fuelChange > 0.1) { // At least 0.1% change
+                        Duration duration = Duration.between(first.getTimestamp(), last.getTimestamp());
+                        double hoursElapsed = duration.toMinutes() / 60.0;
+
+                        if (hoursElapsed > 0.05) { // At least 3 minutes
+                            double burnRate = fuelChange / hoursElapsed;
+                            logger.info("Adaptive calculation succeeded with {} minute window: {}% per hour", minutes, burnRate);
+                            return burnRate;
+                        }
+                    }
+                }
+            }
+        }
+
+        logger.warn("Adaptive calculation failed for all time windows");
+        return null;
+    }
+
+    /**
+     * Calculate fuel burn rate with adaptive time window (liters-based - requires tank capacity)
      * Tries progressively shorter windows: 2h -> 1h -> 30m -> 15m
      * @param deviceId Device identifier
      * @return Fuel burn rate in L/h, or null if no data available
      */
     public Double calculateFuelBurnRateAdaptive(String deviceId) {
         logger.info("Calculating fuel burn rate with adaptive window for device: {}", deviceId);
+
+        Device device = deviceRepository.findByDeviceId(deviceId)
+                .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
+
+        // Need tank capacity for liter-based calculation
+        if (device.getFuelTankCapacityLiters() == null || device.getFuelTankCapacityLiters() <= 0) {
+            logger.info("Tank capacity not configured, falling back to percentage-based calculation");
+            return null;
+        }
 
         // Try different time windows
         int[] windows = {2, 1}; // hours
@@ -269,12 +415,6 @@ public class FuelAnalysisService {
 
         // Try shorter windows in minutes
         int[] minuteWindows = {30, 15};
-        Device device = deviceRepository.findByDeviceId(deviceId)
-                .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
-
-        if (device.getFuelTankCapacityLiters() == null || device.getFuelTankCapacityLiters() <= 0) {
-            return null;
-        }
 
         for (int minutes : minuteWindows) {
             LocalDateTime startTime = LocalDateTime.now().minusMinutes(minutes);
@@ -311,7 +451,63 @@ public class FuelAnalysisService {
     }
 
     /**
-     * Estimate fuel burn rate based on generator specifications and current load
+     * Estimate fuel burn rate in percentage per hour based on typical generator efficiency
+     * Used as fallback when no historical data is available
+     * @param deviceId Device identifier
+     * @return Estimated burn rate in % per hour
+     */
+    public Double estimateFuelBurnRatePercent(String deviceId) {
+        logger.info("Estimating fuel burn rate (% per hour) based on typical efficiency for device: {}", deviceId);
+
+        Device device = deviceRepository.findByDeviceId(deviceId)
+                .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
+
+        // Get current average load
+        Double avgLoadKw = calculateAverageLoad(deviceId, 1); // Last 1 hour
+
+        if (avgLoadKw == null || avgLoadKw <= 0) {
+            // No load data available
+            if (device.getGeneratorCapacityKw() != null && device.getGeneratorCapacityKw() > 0) {
+                // Assume 50% load as default
+                avgLoadKw = device.getGeneratorCapacityKw() * 0.5;
+                logger.info("No load data available, assuming 50% load: {} kW", avgLoadKw);
+            } else {
+                // Use typical medium-size generator assumption
+                avgLoadKw = 100.0; // 100 kW default
+                logger.warn("No generator capacity configured, using default load estimate: {} kW", avgLoadKw);
+            }
+        }
+
+        // Typical diesel generator efficiency:
+        // Full load: ~8-10 hours per full tank
+        // 50% load: ~12-16 hours per full tank
+        // We use: runtime_hours = 100 / (load_factor × base_consumption_rate)
+        // Where base_consumption_rate ≈ 10% per hour at full load
+
+        double loadFactor = 1.0; // Assume full load by default
+        if (device.getGeneratorCapacityKw() != null && device.getGeneratorCapacityKw() > 0) {
+            loadFactor = avgLoadKw / device.getGeneratorCapacityKw();
+        } else {
+            // Assume 50% load factor if capacity unknown
+            loadFactor = 0.5;
+        }
+
+        // Base consumption: 10% per hour at full load (10 hours runtime)
+        // Adjust based on load factor (lower load = lower consumption)
+        double baseConsumptionPercentPerHour = 10.0; // % per hour at full load
+        double estimatedBurnRate = baseConsumptionPercentPerHour * loadFactor;
+
+        // Ensure reasonable bounds (1-15% per hour)
+        estimatedBurnRate = Math.max(1.0, Math.min(15.0, estimatedBurnRate));
+
+        logger.info("Estimated fuel burn rate: {}% per hour (load: {} kW, factor: {})",
+                estimatedBurnRate, avgLoadKw, loadFactor);
+
+        return estimatedBurnRate;
+    }
+
+    /**
+     * Estimate fuel burn rate based on generator specifications and current load (requires tank capacity)
      * Used as fallback when no historical data is available
      * @param deviceId Device identifier
      * @return Estimated burn rate in L/h
@@ -321,6 +517,11 @@ public class FuelAnalysisService {
 
         Device device = deviceRepository.findByDeviceId(deviceId)
                 .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
+
+        // Need tank capacity for liter-based estimation
+        if (device.getFuelTankCapacityLiters() == null || device.getFuelTankCapacityLiters() <= 0) {
+            return null;
+        }
 
         // Get current average load
         Double avgLoadKw = calculateAverageLoad(deviceId, 1); // Last 1 hour
