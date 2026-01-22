@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { historyApi, deviceApi } from '@/lib/api';
+import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 interface Device {
   deviceId: string;
@@ -23,9 +26,11 @@ export default function HistoryPage() {
   const [device, setDevice] = useState<Device | null>(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
   const [availableParameters, setAvailableParameters] = useState<Record<string, string>>({});
   const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
   const [historyData, setHistoryData] = useState<HistoryDataPoint[]>([]);
+  const [chartData, setChartData] = useState<{ timestamp: number; rpm: number }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -38,6 +43,12 @@ export default function HistoryPage() {
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     setEndDate(formatDateTimeLocal(now));
     setStartDate(formatDateTimeLocal(yesterday));
+
+    // Set default date for chart (today)
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    setSelectedDate(`${year}-${month}-${day}`);
   }, [deviceId]);
 
   const formatDateTimeLocal = (date: Date) => {
@@ -91,6 +102,47 @@ export default function HistoryPage() {
 
   const handleDeselectAll = () => {
     setSelectedParameters([]);
+  };
+
+  const handleLoadChartData = async () => {
+    if (!selectedDate) {
+      setError('Please select a date');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // Get start and end of the selected day
+      const startOfDay = new Date(selectedDate);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(selectedDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const data = await historyApi.queryHistory({
+        deviceId,
+        startTime: startOfDay.toISOString(),
+        endTime: endOfDay.toISOString(),
+        parameters: ['rpm'],
+      });
+
+      // Transform data for chart (one record per minute)
+      const transformedData = data
+        .filter((point: any) => point.parameters.rpm !== null && point.parameters.rpm !== undefined)
+        .map((point: any) => ({
+          timestamp: new Date(point.timestamp).getTime(),
+          rpm: point.parameters.rpm,
+        }))
+        .sort((a: { timestamp: number; rpm: number }, b: { timestamp: number; rpm: number }) => a.timestamp - b.timestamp);
+
+      setChartData(transformedData);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to load chart data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleQuery = async () => {
@@ -160,6 +212,136 @@ export default function HistoryPage() {
     }
   };
 
+  // Render charts when data changes
+  useEffect(() => {
+    if (chartData.length === 0 || typeof window === 'undefined') return;
+
+    // Clear previous charts
+    const chartMonthsEl = document.querySelector('#chart-months');
+    const chartYearsEl = document.querySelector('#chart-years');
+    if (chartMonthsEl) chartMonthsEl.innerHTML = '';
+    if (chartYearsEl) chartYearsEl.innerHTML = '';
+
+    // Prepare series data
+    const seriesData = chartData.map(point => [point.timestamp, point.rpm]);
+
+    // Get min and max timestamps for selection range
+    const timestamps = chartData.map(p => p.timestamp);
+    const minTime = Math.min(...timestamps);
+    const maxTime = Math.max(...timestamps);
+
+    // Main chart options
+    const options: any = {
+      series: [{
+        name: 'RPM',
+        data: seriesData
+      }],
+      chart: {
+        id: 'chartyear',
+        type: 'area',
+        height: 350,
+        background: '#F6F8FA',
+        toolbar: {
+          show: false,
+          autoSelected: 'pan'
+        }
+      },
+      colors: ['#FF7F00'],
+      stroke: {
+        width: 2,
+        curve: 'monotoneCubic'
+      },
+      dataLabels: {
+        enabled: false
+      },
+      fill: {
+        opacity: 0.6,
+        type: 'solid'
+      },
+      yaxis: {
+        show: true,
+        forceNiceScale: true,
+        title: {
+          text: 'RPM'
+        }
+      },
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          format: 'HH:mm'
+        }
+      },
+      tooltip: {
+        x: {
+          format: 'HH:mm:ss'
+        }
+      }
+    };
+
+    // Brush chart options
+    const optionsYears: any = {
+      series: [{
+        name: 'RPM',
+        data: seriesData
+      }],
+      chart: {
+        height: 150,
+        type: 'area',
+        background: '#F6F8FA',
+        toolbar: {
+          autoSelected: 'selection',
+        },
+        brush: {
+          enabled: true,
+          target: 'chartyear'
+        },
+        selection: {
+          enabled: true,
+          xaxis: {
+            min: minTime,
+            max: maxTime
+          }
+        },
+      },
+      colors: ['#7BD39A'],
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        width: 1,
+        curve: 'monotoneCubic'
+      },
+      fill: {
+        opacity: 0.4,
+        type: 'solid'
+      },
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          format: 'HH:mm'
+        }
+      },
+      yaxis: {
+        show: false
+      }
+    };
+
+    // Dynamically import and render charts
+    import('apexcharts').then((ApexChartsModule) => {
+      const ApexCharts = ApexChartsModule.default;
+
+      if (chartMonthsEl) {
+        const chart = new ApexCharts(chartMonthsEl, options);
+        chart.render();
+      }
+
+      if (chartYearsEl) {
+        const chartYears = new ApexCharts(chartYearsEl, optionsYears);
+        chartYears.render();
+      }
+    });
+  }, [chartData]);
+
   const formatValue = (value: any) => {
     if (value === null || value === undefined) return '-';
     if (typeof value === 'boolean') return value ? 'YES' : 'NO';
@@ -193,6 +375,45 @@ export default function HistoryPage() {
               Back to Dashboard
             </button>
           </div>
+        </div>
+
+        {/* RPM Area Chart Section */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">RPM Area Chart</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Date
+              </label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={handleLoadChartData}
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition"
+              >
+                Load Chart Data
+              </button>
+            </div>
+          </div>
+
+          {chartData.length > 0 && (
+            <div className="mt-6">
+              <div className="mb-4">
+                <div id="chart-months" />
+              </div>
+              <div>
+                <div id="chart-years" />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Date Selection */}
