@@ -116,7 +116,7 @@ public class AIPredictionService {
         double loadPower = (telemetry.getGeneratorPL1() != null ? telemetry.getGeneratorPL1() : 0.0) +
                           (telemetry.getGeneratorPL2() != null ? telemetry.getGeneratorPL2() : 0.0) +
                           (telemetry.getGeneratorPL3() != null ? telemetry.getGeneratorPL3() : 0.0);
-        double rpm = telemetry.getRPM() != null ? telemetry.getRPM() : 0.0;
+        double rpm = telemetry.getRpm() != null ? telemetry.getRpm() : 0.0;
 
         // Rule-based prediction (Physics-based)
         double ruleBasedRuntime = calculateRuleBasedFuelRuntime(fuelLevel, loadPower, rpm);

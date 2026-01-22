@@ -82,7 +82,7 @@ public class AIModelTrainingService {
             loadPowers[i] = (t.getGeneratorPL1() != null ? t.getGeneratorPL1() : 0.0) +
                            (t.getGeneratorPL2() != null ? t.getGeneratorPL2() : 0.0) +
                            (t.getGeneratorPL3() != null ? t.getGeneratorPL3() : 0.0);
-            rpms[i] = t.getRPM() != null ? t.getRPM() : 0.0;
+            rpms[i] = t.getRpm() != null ? t.getRpm() : 0.0;
 
             // Calculate actual runtime from historical fuel consumption
             // Look ahead to find when fuel runs out or next refuel
