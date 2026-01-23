@@ -268,12 +268,12 @@ export default function HistoryPage() {
       xaxis: {
         type: 'datetime',
         labels: {
-          format: 'HH:mm'
+          format: 'hh:mm tt'
         }
       },
       tooltip: {
         x: {
-          format: 'HH:mm:ss'
+          format: 'hh:mm:ss tt'
         }
       }
     };
@@ -318,7 +318,7 @@ export default function HistoryPage() {
       xaxis: {
         type: 'datetime',
         labels: {
-          format: 'HH:mm'
+          format: 'hh:mm tt'
         }
       },
       yaxis: {
