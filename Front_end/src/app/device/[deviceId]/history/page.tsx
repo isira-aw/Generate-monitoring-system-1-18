@@ -171,6 +171,17 @@ export default function HistoryPage() {
       });
 
       setHistoryData(data);
+
+      // Update chart data with RPM values from the same query
+      const transformedChartData = data
+        .filter((point: any) => point.parameters.rpm !== null && point.parameters.rpm !== undefined)
+        .map((point: any) => ({
+          timestamp: new Date(point.timestamp).getTime(),
+          rpm: point.parameters.rpm,
+        }))
+        .sort((a: { timestamp: number; rpm: number }, b: { timestamp: number; rpm: number }) => a.timestamp - b.timestamp);
+
+      setChartData(transformedChartData);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load historical data');
     } finally {
