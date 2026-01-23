@@ -30,8 +30,9 @@ export default function HistoryPage() {
   const [availableParameters, setAvailableParameters] = useState<Record<string, string>>({});
   const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
   const [historyData, setHistoryData] = useState<HistoryDataPoint[]>([]);
-  const [chartData, setChartData] = useState<{ timestamp: number; rpm: number }[]>([]);
+  const [chartData, setChartData] = useState<{ timestamp: string; rpm: number }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [chartLoading, setChartLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -110,38 +111,19 @@ export default function HistoryPage() {
       return;
     }
 
-    setLoading(true);
+    setChartLoading(true);
     setError('');
 
     try {
-      // Get start and end of the selected day
-      const startOfDay = new Date(selectedDate);
-      startOfDay.setHours(0, 0, 0, 0);
+      // Call new backend endpoint that returns averaged RPM data
+      const data = await historyApi.getRpmChartData(deviceId, selectedDate);
 
-      const endOfDay = new Date(selectedDate);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      const data = await historyApi.queryHistory({
-        deviceId,
-        startTime: startOfDay.toISOString(),
-        endTime: endOfDay.toISOString(),
-        parameters: ['rpm'],
-      });
-
-      // Transform data for chart (one record per minute)
-      const transformedData = data
-        .filter((point: any) => point.parameters.rpm !== null && point.parameters.rpm !== undefined)
-        .map((point: any) => ({
-          timestamp: new Date(point.timestamp).getTime(),
-          rpm: point.parameters.rpm,
-        }))
-        .sort((a: { timestamp: number; rpm: number }, b: { timestamp: number; rpm: number }) => a.timestamp - b.timestamp);
-
-      setChartData(transformedData);
+      // Data is already averaged by minute from backend (max 1440 points)
+      setChartData(data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load chart data');
     } finally {
-      setLoading(false);
+      setChartLoading(false);
     }
   };
 
@@ -212,7 +194,7 @@ export default function HistoryPage() {
     }
   };
 
-  // Render charts when data changes
+  // Render RPM chart when data changes
   useEffect(() => {
     if (chartData.length === 0 || typeof window === 'undefined') return;
 
@@ -222,18 +204,21 @@ export default function HistoryPage() {
     if (chartMonthsEl) chartMonthsEl.innerHTML = '';
     if (chartYearsEl) chartYearsEl.innerHTML = '';
 
-    // Prepare series data
-    const seriesData = chartData.map(point => [point.timestamp, point.rpm]);
+    // Prepare series data - convert timestamp string to milliseconds
+    const seriesData = chartData.map(point => [
+      new Date(point.timestamp).getTime(),
+      point.rpm
+    ]);
 
     // Get min and max timestamps for selection range
-    const timestamps = chartData.map(p => p.timestamp);
+    const timestamps = seriesData.map(p => p[0]);
     const minTime = Math.min(...timestamps);
     const maxTime = Math.max(...timestamps);
 
     // Main chart options
     const options: any = {
       series: [{
-        name: 'RPM',
+        name: 'RPM (Avg per minute)',
         data: seriesData
       }],
       chart: {
@@ -249,7 +234,7 @@ export default function HistoryPage() {
       colors: ['#FF7F00'],
       stroke: {
         width: 2,
-        curve: 'monotoneCubic'
+        curve: 'smooth'
       },
       dataLabels: {
         enabled: false
@@ -262,7 +247,7 @@ export default function HistoryPage() {
         show: true,
         forceNiceScale: true,
         title: {
-          text: 'RPM'
+          text: 'RPM (Average per Minute)'
         }
       },
       xaxis: {
@@ -274,14 +259,17 @@ export default function HistoryPage() {
       tooltip: {
         x: {
           format: 'HH:mm:ss'
+        },
+        y: {
+          formatter: (value: number) => value.toFixed(2) + ' RPM'
         }
       }
     };
 
-    // Brush chart options
+    // Brush chart options (bottom timeline selector)
     const optionsYears: any = {
       series: [{
-        name: 'RPM',
+        name: 'RPM (Avg per minute)',
         data: seriesData
       }],
       chart: {
@@ -309,7 +297,7 @@ export default function HistoryPage() {
       },
       stroke: {
         width: 1,
-        curve: 'monotoneCubic'
+        curve: 'smooth'
       },
       fill: {
         opacity: 0.4,
@@ -377,9 +365,14 @@ export default function HistoryPage() {
           </div>
         </div>
 
-        {/* RPM Area Chart Section */}
+        {/* RPM Area Chart Section - Rebuilt with 1-minute averaging */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">RPM Area Chart</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            RPM Area Chart (Average per Minute)
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Shows average RPM values per minute (max 1440 data points per day). Each point represents the average of all RPM readings within that minute.
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -396,22 +389,43 @@ export default function HistoryPage() {
             <div className="flex items-end">
               <button
                 onClick={handleLoadChartData}
-                disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition"
+                disabled={chartLoading}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition flex items-center"
               >
-                Load Chart Data
+                {chartLoading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Loading...
+                  </>
+                ) : (
+                  'Load Chart Data'
+                )}
               </button>
             </div>
           </div>
 
           {chartData.length > 0 && (
             <div className="mt-6">
+              <div className="bg-gray-100 p-3 rounded-md mb-4">
+                <p className="text-sm text-gray-700">
+                  <strong>Data Points:</strong> {chartData.length} minutes (averaged from raw telemetry data)
+                </p>
+              </div>
               <div className="mb-4">
                 <div id="chart-months" />
               </div>
               <div>
                 <div id="chart-years" />
               </div>
+            </div>
+          )}
+
+          {chartData.length === 0 && !chartLoading && (
+            <div className="mt-6 p-4 bg-gray-100 rounded-md text-center text-gray-600">
+              Select a date and click "Load Chart Data" to view the RPM chart
             </div>
           )}
         </div>

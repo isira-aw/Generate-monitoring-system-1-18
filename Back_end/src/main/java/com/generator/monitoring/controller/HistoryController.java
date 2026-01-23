@@ -182,4 +182,32 @@ public class HistoryController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
+    /**
+     * Get averaged RPM data per minute for a specific day (max 1440 points)
+     */
+    @GetMapping("/rpm-chart/{deviceId}")
+    public ResponseEntity<List<Map<String, Object>>> getRpmChartData(
+            @PathVariable String deviceId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date) {
+        try {
+            // Get start and end of the day
+            LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+            LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59);
+
+            logger.info("Getting RPM chart data for device: {}, date: {}", deviceId, date.toLocalDate());
+
+            List<Map<String, Object>> rpmData = historyService.getAveragedRpmData(
+                    deviceId,
+                    startOfDay,
+                    endOfDay
+            );
+
+            logger.info("Returning {} averaged RPM data points for device: {}", rpmData.size(), deviceId);
+            return ResponseEntity.ok(rpmData);
+        } catch (Exception e) {
+            logger.error("Error getting RPM chart data for device {}: {}", deviceId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }
