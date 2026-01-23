@@ -21,7 +21,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/history")
-@CrossOrigin(origins = "*")
 public class HistoryController {
 
     private static final Logger logger = LoggerFactory.getLogger(HistoryController.class);

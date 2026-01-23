@@ -347,10 +347,10 @@ public class DeviceService {
         boolean hasAccess = device.getUsers().stream()
                 .anyMatch(u -> u.getId().equals(user.getId()));
 
-//        if (!hasAccess) {
-//            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
-//            throw new DeviceAccessDeniedException("You don't have access to edit this device");
-//        }
+        if (!hasAccess) {
+            logger.error("User {} does not have access to device {}", finalUserEmail, finalDeviceId);
+            throw new DeviceAccessDeniedException("You don't have access to edit this device");
+        }
 
         // Update device info
         if (name != null && !name.trim().isEmpty()) {
