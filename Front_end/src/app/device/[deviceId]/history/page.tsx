@@ -29,9 +29,13 @@ export default function HistoryPage() {
   const [availableParameters, setAvailableParameters] = useState<Record<string, string>>({});
   const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
   const [historyData, setHistoryData] = useState<HistoryDataPoint[]>([]);
-  const [chartData, setChartData] = useState<{ timestamp: number; rpm: number }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // RPM Chart States - Completely New
+  const [showRpmChart, setShowRpmChart] = useState(false);
+  const [chartFilterTime, setChartFilterTime] = useState('');
+  const [rpmChartData, setRpmChartData] = useState<{ timestamp: number; rpm: number }[]>([]);
 
   useEffect(() => {
     loadDeviceInfo();
@@ -123,35 +127,58 @@ export default function HistoryPage() {
       });
 
       setHistoryData(data);
-
-      // Extract RPM data for chart - one record per minute
-      const rpmData = data
-        .filter((point: any) => point.parameters.rpm !== null && point.parameters.rpm !== undefined)
-        .map((point: any) => ({
-          timestamp: new Date(point.timestamp).getTime(),
-          rpm: point.parameters.rpm,
-          minute: new Date(point.timestamp).toISOString().slice(0, 16) // YYYY-MM-DDTHH:mm
-        }));
-
-      // Group by minute and take first record of each minute
-      const minuteMap = new Map<string, { timestamp: number; rpm: number }>();
-      rpmData.forEach((point) => {
-        if (!minuteMap.has(point.minute)) {
-          minuteMap.set(point.minute, { timestamp: point.timestamp, rpm: point.rpm });
-        }
-      });
-
-      // Convert to array and sort by timestamp
-      const transformedChartData = Array.from(minuteMap.values())
-        .sort((a, b) => a.timestamp - b.timestamp);
-
-      console.log('RPM Chart Data:', transformedChartData.length, 'data points');
-      setChartData(transformedChartData);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load historical data');
     } finally {
       setLoading(false);
     }
+  };
+
+  // NEW FUNCTION: Generate RPM Chart from Historical Data
+  const handleGenerateRpmChart = () => {
+    if (historyData.length === 0) {
+      setError('Please query historical data first');
+      return;
+    }
+
+    // Filter historical data for RPM
+    let filteredData = historyData.filter(
+      (point: any) => point.parameters.rpm !== null && point.parameters.rpm !== undefined
+    );
+
+    // Apply time filter if specified (e.g., "5:00 PM" onwards)
+    if (chartFilterTime) {
+      const filterDate = new Date(chartFilterTime);
+      const filterTimestamp = filterDate.getTime();
+
+      filteredData = filteredData.filter((point: any) => {
+        const pointTimestamp = new Date(point.timestamp).getTime();
+        return pointTimestamp >= filterTimestamp;
+      });
+    }
+
+    // Extract RPM and Timestamp, group by minute (one record per minute)
+    const minuteMap = new Map<string, { timestamp: number; rpm: number }>();
+
+    filteredData.forEach((point: any) => {
+      const timestamp = new Date(point.timestamp);
+      const minuteKey = timestamp.toISOString().slice(0, 16); // YYYY-MM-DDTHH:mm
+
+      // Take first record of each minute
+      if (!minuteMap.has(minuteKey)) {
+        minuteMap.set(minuteKey, {
+          timestamp: timestamp.getTime(),
+          rpm: point.parameters.rpm
+        });
+      }
+    });
+
+    // Convert to array and sort
+    const chartData = Array.from(minuteMap.values()).sort((a, b) => a.timestamp - b.timestamp);
+
+    setRpmChartData(chartData);
+    setShowRpmChart(true);
+    setError('');
   };
 
   const handleGeneratePdf = async () => {
@@ -188,135 +215,102 @@ export default function HistoryPage() {
     }
   };
 
-  // Render charts when data changes
+  // NEW: Render RPM Chart with ApexCharts
   useEffect(() => {
-    if (chartData.length === 0 || typeof window === 'undefined') return;
+    if (rpmChartData.length === 0 || !showRpmChart || typeof window === 'undefined') return;
 
-    // Clear previous charts
-    const chartMonthsEl = document.querySelector('#chart-months');
-    const chartYearsEl = document.querySelector('#chart-years');
-    if (chartMonthsEl) chartMonthsEl.innerHTML = '';
-    if (chartYearsEl) chartYearsEl.innerHTML = '';
+    // Clear previous chart
+    const chartEl = document.querySelector('#rpm-area-chart');
+    if (chartEl) chartEl.innerHTML = '';
 
-    // Prepare series data
-    const seriesData = chartData.map(point => [point.timestamp, point.rpm]);
+    // Prepare data for chart
+    const seriesData = rpmChartData.map(point => [point.timestamp, point.rpm]);
 
-    // Get min and max timestamps for selection range
-    const timestamps = chartData.map(p => p.timestamp);
-    const minTime = Math.min(...timestamps);
-    const maxTime = Math.max(...timestamps);
-
-    // Main chart options
+    // Chart configuration
     const options: any = {
       series: [{
         name: 'RPM',
         data: seriesData
       }],
       chart: {
-        id: 'chartyear',
         type: 'area',
-        height: 350,
+        height: 400,
         background: '#F6F8FA',
         toolbar: {
-          show: false,
-          autoSelected: 'pan'
+          show: true,
+          tools: {
+            download: true,
+            selection: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+            reset: true
+          }
         }
       },
       colors: ['#FF7F00'],
       stroke: {
         width: 2,
-        curve: 'monotoneCubic'
+        curve: 'smooth'
       },
       dataLabels: {
         enabled: false
       },
       fill: {
-        opacity: 0.6,
+        opacity: 0.5,
         type: 'solid'
       },
-      yaxis: {
-        show: true,
-        forceNiceScale: true,
-        title: {
-          text: 'RPM'
+      markers: {
+        size: 3,
+        hover: {
+          size: 5
         }
       },
       xaxis: {
         type: 'datetime',
         labels: {
-          format: 'hh:mm tt'
+          format: 'hh:mm tt',
+          datetimeFormatter: {
+            year: 'yyyy',
+            month: 'MMM \'yy',
+            day: 'dd MMM',
+            hour: 'hh:mm tt'
+          }
         }
+      },
+      yaxis: {
+        title: {
+          text: 'RPM Value'
+        },
+        forceNiceScale: true
       },
       tooltip: {
         x: {
-          format: 'hh:mm:ss tt'
+          format: 'MMM dd, yyyy hh:mm:ss tt'
+        },
+        y: {
+          formatter: (value: number) => value.toFixed(2)
+        }
+      },
+      grid: {
+        borderColor: '#e7e7e7',
+        row: {
+          colors: ['#f3f3f3', 'transparent'],
+          opacity: 0.5
         }
       }
     };
 
-    // Brush chart options
-    const optionsYears: any = {
-      series: [{
-        name: 'RPM',
-        data: seriesData
-      }],
-      chart: {
-        height: 150,
-        type: 'area',
-        background: '#F6F8FA',
-        toolbar: {
-          autoSelected: 'selection',
-        },
-        brush: {
-          enabled: true,
-          target: 'chartyear'
-        },
-        selection: {
-          enabled: true,
-          xaxis: {
-            min: minTime,
-            max: maxTime
-          }
-        },
-      },
-      colors: ['#7BD39A'],
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        width: 1,
-        curve: 'monotoneCubic'
-      },
-      fill: {
-        opacity: 0.4,
-        type: 'solid'
-      },
-      xaxis: {
-        type: 'datetime',
-        labels: {
-          format: 'hh:mm tt'
-        }
-      },
-      yaxis: {
-        show: false
-      }
-    };
-
-    // Dynamically import and render charts
+    // Render chart
     import('apexcharts').then((ApexChartsModule) => {
       const ApexCharts = ApexChartsModule.default;
-
-      if (chartMonthsEl) {
-        const chart = new ApexCharts(chartMonthsEl, options);
+      if (chartEl) {
+        const chart = new ApexCharts(chartEl, options);
         chart.render();
       }
-
-      if (chartYearsEl) {
-        const chartYears = new ApexCharts(chartYearsEl, optionsYears);
-        chartYears.render();
-      }
     });
-  }, [chartData]);
+  }, [rpmChartData, showRpmChart]);
 
   const formatValue = (value: any) => {
     if (value === null || value === undefined) return '-';
@@ -462,38 +456,72 @@ export default function HistoryPage() {
           )}
         </div>
 
-        {/* RPM Area Chart */}
+        {/* NEW RPM AREA CHART SECTION */}
         {historyData.length > 0 && (
-          <>
-            {chartData.length > 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">RPM Area Chart</h2>
-                <div className="mt-6">
-                  <div className="mb-4">
-                    <div id="chart-months" />
-                  </div>
-                  <div>
-                    <div id="chart-years" />
-                  </div>
-                </div>
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">RPM Area Chart</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Generate RPM chart from the historical data above. Optionally filter by start time.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Filter by Start Time (Optional - e.g., show from 5:00 PM onwards)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={chartFilterTime}
+                  onChange={(e) => setChartFilterTime(e.target.value)}
+                  placeholder="Leave empty for all data"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Leave empty to show all data, or select a time to show data from that time onwards
+                </p>
               </div>
-            ) : (
-              selectedParameters.includes('rpm') && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                  <p className="text-yellow-800">
-                    <strong>RPM Area Chart:</strong> No RPM data available for the selected time range.
+              <div className="flex items-end gap-2">
+                <button
+                  onClick={handleGenerateRpmChart}
+                  className="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-md transition"
+                >
+                  Generate Chart
+                </button>
+                {showRpmChart && (
+                  <button
+                    onClick={() => {
+                      setShowRpmChart(false);
+                      setRpmChartData([]);
+                      setChartFilterTime('');
+                    }}
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {showRpmChart && rpmChartData.length > 0 && (
+              <div className="mt-6 border-t pt-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Chart Info:</strong> Showing {rpmChartData.length} data points (one record per minute)
+                    {chartFilterTime && ` from ${new Date(chartFilterTime).toLocaleString()} onwards`}
                   </p>
                 </div>
-              )
+                <div id="rpm-area-chart"></div>
+              </div>
             )}
-            {!selectedParameters.includes('rpm') && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <p className="text-blue-800">
-                  <strong>Tip:</strong> Select "RPM" parameter to view the RPM Area Chart.
+
+            {showRpmChart && rpmChartData.length === 0 && (
+              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-yellow-800">
+                  No RPM data available for the selected filter. Try adjusting the time filter or query more data.
                 </p>
               </div>
             )}
-          </>
+          </div>
         )}
 
         {/* Data Table */}
