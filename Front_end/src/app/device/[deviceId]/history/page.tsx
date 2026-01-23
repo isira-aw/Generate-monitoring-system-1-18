@@ -145,6 +145,7 @@ export default function HistoryPage() {
       const transformedChartData = Array.from(minuteMap.values())
         .sort((a, b) => a.timestamp - b.timestamp);
 
+      console.log('RPM Chart Data:', transformedChartData.length, 'data points');
       setChartData(transformedChartData);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load historical data');
@@ -243,12 +244,12 @@ export default function HistoryPage() {
       xaxis: {
         type: 'datetime',
         labels: {
-          format: 'HH:mm'
+          format: 'hh:mm tt'
         }
       },
       tooltip: {
         x: {
-          format: 'HH:mm:ss'
+          format: 'hh:mm:ss tt'
         }
       }
     };
@@ -293,7 +294,7 @@ export default function HistoryPage() {
       xaxis: {
         type: 'datetime',
         labels: {
-          format: 'HH:mm'
+          format: 'hh:mm tt'
         }
       },
       yaxis: {
@@ -462,18 +463,37 @@ export default function HistoryPage() {
         </div>
 
         {/* RPM Area Chart */}
-        {chartData.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">RPM Area Chart</h2>
-            <div className="mt-6">
-              <div className="mb-4">
-                <div id="chart-months" />
+        {historyData.length > 0 && (
+          <>
+            {chartData.length > 0 ? (
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">RPM Area Chart</h2>
+                <div className="mt-6">
+                  <div className="mb-4">
+                    <div id="chart-months" />
+                  </div>
+                  <div>
+                    <div id="chart-years" />
+                  </div>
+                </div>
               </div>
-              <div>
-                <div id="chart-years" />
+            ) : (
+              selectedParameters.includes('rpm') && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                  <p className="text-yellow-800">
+                    <strong>RPM Area Chart:</strong> No RPM data available for the selected time range.
+                  </p>
+                </div>
+              )
+            )}
+            {!selectedParameters.includes('rpm') && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-blue-800">
+                  <strong>Tip:</strong> Select "RPM" parameter to view the RPM Area Chart.
+                </p>
               </div>
-            </div>
-          </div>
+            )}
+          </>
         )}
 
         {/* Data Table */}
