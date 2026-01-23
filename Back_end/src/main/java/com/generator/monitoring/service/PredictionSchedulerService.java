@@ -17,10 +17,10 @@ public class PredictionSchedulerService {
     private final DeviceRepository deviceRepository;
     private final PredictionService predictionService;
 
-    /**
-     * Collect prediction data for all devices every 30 minutes
-     * Cron: 0 */30 * * * * = At minute 0 and 30 of every hour
-     */
+//    /**
+//     * Collect prediction data for all devices every 30 minutes
+//     * Cron: 0 */30 * * * * = At minute 0 and 30 of every hour
+//     **/
     @Scheduled(cron = "0 */30 * * * *")
     public void collectPredictionDataForAllDevices() {
         log.info("Starting scheduled prediction data collection for all devices");
