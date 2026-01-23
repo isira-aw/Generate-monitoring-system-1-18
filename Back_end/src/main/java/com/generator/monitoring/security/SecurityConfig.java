@@ -67,6 +67,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/devices").permitAll()
                         .requestMatchers("/api/devices/*/dashboard").permitAll()
                         .requestMatchers("/api/history/**").permitAll()
+                        .requestMatchers("/api/predictions/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
