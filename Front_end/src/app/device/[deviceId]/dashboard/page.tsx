@@ -22,6 +22,14 @@ interface HistoricalData {
   frequency: number;
 }
 
+interface Threshold {
+  id: number;
+  parameter: string;
+  minValue: number;
+  maxValue: number;
+  unit: string;
+}
+
 export default function DashboardPage() {
   const params = useParams();
   const router = useRouter();
@@ -32,6 +40,7 @@ export default function DashboardPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
+  const [thresholds, setThresholds] = useState<Threshold[]>([]);
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -39,6 +48,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDeviceInfo();
+    loadThresholds();
   }, [deviceId]);
 
   useEffect(() => {
@@ -50,7 +60,7 @@ export default function DashboardPage() {
         voltage: data.telemetry.Generator_Voltage_L1_N || 0,
         frequency: data.telemetry.Generator_Frequency || 0,
       };
-      
+
       setHistory(prev => {
         const updated = [...prev, newPoint];
         return updated.slice(-40);
@@ -68,6 +78,15 @@ export default function DashboardPage() {
       setDevice(deviceData);
     } catch (err) {
       console.error('Failed to load device info:', err);
+    }
+  };
+
+  const loadThresholds = async () => {
+    try {
+      const thresholdData = await deviceApi.getDeviceThresholds(deviceId);
+      setThresholds(thresholdData);
+    } catch (err) {
+      console.error('Failed to load thresholds:', err);
     }
   };
 
@@ -206,6 +225,18 @@ export default function DashboardPage() {
     </div>
   );
 
+  const formatParameterName = (parameter: string) => {
+    return parameter
+      .split('_')
+      .map((word) => {
+        if (['RPM', 'PF', 'LN', 'LL', 'ROCOF', 'KW', 'KVAR', 'KVA', 'HZ'].includes(word)) {
+          return word;
+        }
+        return word.charAt(0) + word.slice(1).toLowerCase();
+      })
+      .join(' ');
+  };
+
   const CollapsibleSection = ({ title, children, id }: { title: string; children: React.ReactNode; id: string }) => {
     const isExpanded = expandedSection === id;
     return (
@@ -258,6 +289,16 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               AI Support
+            </button>
+            <button
+              onClick={() => router.push(`/device/${deviceId}/settings`)}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Settings
             </button>
           </div>
           {telemetry && (
@@ -409,6 +450,24 @@ export default function DashboardPage() {
               <DataRow label="ROCOF" value={telemetry?.ROCOF} unit="Hz/s" />
               <DataRow label="Max ROCOF" value={telemetry?.Max_ROCOF} unit="Hz/s" />
               <DataRow label="D+" value={telemetry?.D_Plus} unit="V" />
+            </div>
+          </CollapsibleSection>
+
+          <CollapsibleSection title="Configured Thresholds" id="thresholds">
+            <div className="space-y-0">
+              {thresholds.length > 0 ? (
+                thresholds.map((threshold) => (
+                  <div key={threshold.id} className="py-2 px-2 text-xs border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                    <div className="font-medium text-gray-700 mb-1">{formatParameterName(threshold.parameter)}</div>
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="text-gray-600">Min: <span className="font-semibold text-green-700">{threshold.minValue} {threshold.unit}</span></span>
+                      <span className="text-gray-600">Max: <span className="font-semibold text-red-700">{threshold.maxValue} {threshold.unit}</span></span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-4">No thresholds configured</div>
+              )}
             </div>
           </CollapsibleSection>
         </div>
@@ -567,6 +626,28 @@ export default function DashboardPage() {
                 <DataRow label="ROCOF" value={telemetry?.ROCOF} unit="Hz/s" />
                 <DataRow label="Max ROCOF" value={telemetry?.Max_ROCOF} unit="Hz/s" />
                 <DataRow label="D+" value={telemetry?.D_Plus} unit="V" />
+              </div>
+            </div>
+
+            {/* Configured Thresholds */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-800 to-indigo-700 px-3 py-2">
+                <h3 className="text-sm font-semibold text-white">Configured Thresholds</h3>
+              </div>
+              <div className="p-3 flex-1 overflow-y-auto">
+                {thresholds.length > 0 ? (
+                  thresholds.map((threshold) => (
+                    <div key={threshold.id} className="py-2 px-2 text-xs border-b border-gray-100 last:border-0 hover:bg-gray-50 rounded">
+                      <div className="font-medium text-gray-700 mb-1.5">{formatParameterName(threshold.parameter)}</div>
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="text-gray-600 bg-green-50 px-2 py-1 rounded">Min: <span className="font-semibold text-green-700">{threshold.minValue} {threshold.unit}</span></span>
+                        <span className="text-gray-600 bg-red-50 px-2 py-1 rounded">Max: <span className="font-semibold text-red-700">{threshold.maxValue} {threshold.unit}</span></span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center text-gray-500 py-4 text-xs">No thresholds configured</div>
+                )}
               </div>
             </div>
           </div>
