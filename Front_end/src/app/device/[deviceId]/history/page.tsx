@@ -26,7 +26,6 @@ export default function HistoryPage() {
   const [device, setDevice] = useState<Device | null>(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
   const [availableParameters, setAvailableParameters] = useState<Record<string, string>>({});
   const [selectedParameters, setSelectedParameters] = useState<string[]>([]);
   const [historyData, setHistoryData] = useState<HistoryDataPoint[]>([]);
@@ -43,12 +42,6 @@ export default function HistoryPage() {
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     setEndDate(formatDateTimeLocal(now));
     setStartDate(formatDateTimeLocal(yesterday));
-
-    // Set default date for chart (today)
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    setSelectedDate(`${year}-${month}-${day}`);
   }, [deviceId]);
 
   const formatDateTimeLocal = (date: Date) => {
@@ -104,47 +97,6 @@ export default function HistoryPage() {
     setSelectedParameters([]);
   };
 
-  const handleLoadChartData = async () => {
-    if (!selectedDate) {
-      setError('Please select a date');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      // Get start and end of the selected day
-      const startOfDay = new Date(selectedDate);
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const endOfDay = new Date(selectedDate);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      const data = await historyApi.queryHistory({
-        deviceId,
-        startTime: startOfDay.toISOString(),
-        endTime: endOfDay.toISOString(),
-        parameters: ['rpm'],
-      });
-
-      // Transform data for chart (one record per minute)
-      const transformedData = data
-        .filter((point: any) => point.parameters.rpm !== null && point.parameters.rpm !== undefined)
-        .map((point: any) => ({
-          timestamp: new Date(point.timestamp).getTime(),
-          rpm: point.parameters.rpm,
-        }))
-        .sort((a: { timestamp: number; rpm: number }, b: { timestamp: number; rpm: number }) => a.timestamp - b.timestamp);
-
-      setChartData(transformedData);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load chart data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleQuery = async () => {
     if (!startDate || !endDate) {
       setError('Please select both start and end dates');
@@ -172,14 +124,26 @@ export default function HistoryPage() {
 
       setHistoryData(data);
 
-      // Update chart data with RPM values from the same query
-      const transformedChartData = data
+      // Extract RPM data for chart - one record per minute
+      const rpmData = data
         .filter((point: any) => point.parameters.rpm !== null && point.parameters.rpm !== undefined)
         .map((point: any) => ({
           timestamp: new Date(point.timestamp).getTime(),
           rpm: point.parameters.rpm,
-        }))
-        .sort((a: { timestamp: number; rpm: number }, b: { timestamp: number; rpm: number }) => a.timestamp - b.timestamp);
+          minute: new Date(point.timestamp).toISOString().slice(0, 16) // YYYY-MM-DDTHH:mm
+        }));
+
+      // Group by minute and take first record of each minute
+      const minuteMap = new Map<string, { timestamp: number; rpm: number }>();
+      rpmData.forEach((point) => {
+        if (!minuteMap.has(point.minute)) {
+          minuteMap.set(point.minute, { timestamp: point.timestamp, rpm: point.rpm });
+        }
+      });
+
+      // Convert to array and sort by timestamp
+      const transformedChartData = Array.from(minuteMap.values())
+        .sort((a, b) => a.timestamp - b.timestamp);
 
       setChartData(transformedChartData);
     } catch (err: any) {
@@ -388,45 +352,6 @@ export default function HistoryPage() {
           </div>
         </div>
 
-        {/* RPM Area Chart Section */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">RPM Area Chart</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Date
-              </label>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="flex items-end">
-              <button
-                onClick={handleLoadChartData}
-                disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition"
-              >
-                Load Chart Data
-              </button>
-            </div>
-          </div>
-
-          {chartData.length > 0 && (
-            <div className="mt-6">
-              <div className="mb-4">
-                <div id="chart-months" />
-              </div>
-              <div>
-                <div id="chart-years" />
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* Date Selection */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Select Time Period</h2>
@@ -535,6 +460,21 @@ export default function HistoryPage() {
             </div>
           )}
         </div>
+
+        {/* RPM Area Chart */}
+        {chartData.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">RPM Area Chart</h2>
+            <div className="mt-6">
+              <div className="mb-4">
+                <div id="chart-months" />
+              </div>
+              <div>
+                <div id="chart-years" />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Data Table */}
         {historyData.length > 0 && (
