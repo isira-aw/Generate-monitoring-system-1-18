@@ -213,4 +213,9 @@ export const historyApi = {
     const response = await api.post('/api/history/cleanup');
     return response.data;
   },
+
+  getRpmChartData: async (deviceId: string, date: string) => {
+    const response = await api.get(`/api/history/rpm-chart/${deviceId}?date=${date}`);
+    return response.data;
+  },
 };

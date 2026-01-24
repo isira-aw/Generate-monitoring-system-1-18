@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -180,6 +181,34 @@ public class HistoryController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Get averaged RPM data per minute for a specific day (max 1440 points)
+     */
+    @GetMapping("/rpm-chart/{deviceId}")
+    public ResponseEntity<List<Map<String, Object>>> getRpmChartData(
+            @PathVariable String deviceId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        try {
+            // Get start and end of the day
+            LocalDateTime startOfDay = date.atStartOfDay();
+            LocalDateTime endOfDay = date.atTime(23, 59, 59);
+
+            logger.info("Getting RPM chart data for device: {}, date: {}", deviceId, date);
+
+            List<Map<String, Object>> rpmData = historyService.getAveragedRpmData(
+                    deviceId,
+                    startOfDay,
+                    endOfDay
+            );
+
+            logger.info("Returning {} averaged RPM data points for device: {}", rpmData.size(), deviceId);
+            return ResponseEntity.ok(rpmData);
+        } catch (Exception e) {
+            logger.error("Error getting RPM chart data for device {}: {}", deviceId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

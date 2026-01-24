@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -167,5 +168,71 @@ public class HistoryService {
         displayNames.put("eStop", "E-STOP");
         displayNames.put("alarm", "Alarm");
         return displayNames;
+    }
+
+    /**
+     * Get averaged RPM data per minute for RPM chart
+     * Returns max 1440 data points (one per minute for 24 hours)
+     * Each data point contains: timestamp and average RPM for that minute
+     */
+    public List<Map<String, Object>> getAveragedRpmData(String deviceId, LocalDateTime startTime, LocalDateTime endTime) {
+        logger.info("Getting averaged RPM data for device: {}, startTime: {}, endTime: {}", deviceId, startTime, endTime);
+
+        Device device = deviceRepository.findByDeviceId(deviceId)
+                .orElseThrow(() -> new RuntimeException("Device not found: " + deviceId));
+
+        // Get all telemetry records for the time range
+        List<TelemetryHistory> historyRecords = telemetryHistoryRepository
+                .findByDeviceAndTimeRange(device, startTime, endTime);
+
+        logger.info("Found {} raw telemetry records for device: {}", historyRecords.size(), deviceId);
+
+        if (historyRecords.isEmpty()) {
+            logger.warn("No telemetry records found for device: {} in time range {} to {}",
+                    deviceId, startTime, endTime);
+            return new ArrayList<>();
+        }
+
+        // Group records by minute and calculate average RPM for each minute
+        Map<LocalDateTime, List<Double>> rpmByMinute = new TreeMap<>();
+
+        for (TelemetryHistory record : historyRecords) {
+            // Skip records without RPM data
+            if (record.getRpm() == null) {
+                continue;
+            }
+
+            // Truncate timestamp to minute (e.g., 2024-01-15 14:35:23 -> 2024-01-15 14:35:00)
+            LocalDateTime minuteTimestamp = record.getTimestamp().truncatedTo(ChronoUnit.MINUTES);
+
+            // Add RPM value to the corresponding minute bucket
+            rpmByMinute.computeIfAbsent(minuteTimestamp, k -> new ArrayList<>()).add(record.getRpm());
+        }
+
+        logger.info("Grouped data into {} minute buckets", rpmByMinute.size());
+
+        // Calculate average RPM for each minute and prepare result
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Map.Entry<LocalDateTime, List<Double>> entry : rpmByMinute.entrySet()) {
+            LocalDateTime minuteTimestamp = entry.getKey();
+            List<Double> rpmValues = entry.getValue();
+
+            // Calculate average RPM for this minute
+            double averageRpm = rpmValues.stream()
+                    .mapToDouble(Double::doubleValue)
+                    .average()
+                    .orElse(0.0);
+
+            Map<String, Object> dataPoint = new HashMap<>();
+            dataPoint.put("timestamp", minuteTimestamp.toString());
+            dataPoint.put("rpm", Math.round(averageRpm * 100.0) / 100.0); // Round to 2 decimal places
+
+            result.add(dataPoint);
+        }
+
+        logger.info("Returning {} averaged RPM data points (max 1440 per day)", result.size());
+
+        return result;
     }
 }
