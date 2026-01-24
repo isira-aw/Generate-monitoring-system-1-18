@@ -1,21 +1,78 @@
-# Generator Monitoring System
+# 🔌 Generator Monitoring System
 
-A comprehensive MVP-level monitoring system for generators with real-time telemetry data, alarm management, and threshold configuration.
+**Production-ready real-time monitoring system for generators with telemetry tracking, predictive analytics, and alarm management.**
 
-## Architecture Overview
+[![Frontend CI/CD](https://github.com/your-org/repo/actions/workflows/frontend-ci-cd.yml/badge.svg)](https://github.com/your-org/repo/actions)
+[![Backend CI/CD](https://github.com/your-org/repo/actions/workflows/backend-ci-cd.yml/badge.svg)](https://github.com/your-org/repo/actions)
 
-### Backend (Spring Boot)
-- **Authentication**: JWT-based security with HttpOnly cookies
-- **MQTT Integration**: Eclipse Paho client for Mosquitto broker
-- **WebSocket**: Real-time data streaming to frontend
-- **Database**: H2 (embedded for MVP, easily replaceable with PostgreSQL/MySQL)
-- **Data Flow**: MQTT → Threshold Evaluation → WebSocket → Frontend
+## 🚀 Quick Start
 
-### Frontend (Next.js)
-- **Public Dashboard**: Real-time telemetry display (no authentication)
-- **Protected Settings**: JWT-required threshold configuration
-- **WebSocket**: Live updates using STOMP over SockJS
-- **State Management**: React Context API for authentication
+```bash
+# Clone and start with Docker Compose
+git clone <repository-url>
+cd Generate-monitoring-system-1-18
+cp .env.example .env
+# Edit .env with your credentials
+docker-compose up -d
+
+# Access: http://localhost
+```
+
+📖 **[Full Deployment Guide](./DEPLOYMENT.md)**
+
+---
+
+## 🏗️ Architecture
+
+### Production-Grade Microservices Architecture
+
+```
+┌─────────────────────────────────────────┐
+│     NGINX Reverse Proxy (Port 80)      │
+│   ├─ /         → Frontend (Next.js)    │
+│   ├─ /api      → Backend (Spring Boot) │
+│   └─ /ws       → WebSocket             │
+└──────────┬──────────────────────────────┘
+           │
+    ┌──────┴────────┐
+    │               │
+┌───▼────────┐  ┌──▼────────────┐
+│  Frontend  │  │    Backend    │
+│  Next.js   │  │  Spring Boot  │
+│  Node 18   │  │    Java 17    │
+└────────────┘  └───┬───────────┘
+                    │
+          ┌─────────┴────────┐
+          │                  │
+     ┌────▼─────┐      ┌────▼────────┐
+     │PostgreSQL│      │  Mosquitto  │
+     │ Database │      │ MQTT Broker │
+     └──────────┘      └─────────────┘
+```
+
+### Technology Stack
+
+**Frontend** (`Front_end/`)
+- ⚛️ Next.js 14 (React 18) + TypeScript
+- 🎨 Tailwind CSS
+- 📊 ApexCharts for data visualization
+- 🔌 STOMP.js + SockJS for real-time WebSocket
+- 🔒 JWT-based authentication
+
+**Backend** (`Back_end/`)
+- ☕ Spring Boot 3.2.1 (Java 17)
+- 🔐 Spring Security + JWT
+- 📡 MQTT (Eclipse Paho) + WebSocket (STOMP)
+- 🗄️ PostgreSQL + JPA/Hibernate
+- 📧 Email notifications
+- 📄 PDF report generation (iText7)
+- 🔮 Predictive analytics (fuel/battery)
+
+**Infrastructure**
+- 🐳 Docker + Docker Compose
+- 🌐 NGINX reverse proxy
+- 🔄 GitHub Actions CI/CD
+- 📊 Spring Boot Actuator for monitoring
 
 ## Features
 
@@ -35,106 +92,155 @@ A comprehensive MVP-level monitoring system for generators with real-time teleme
 ✅ CORS configuration
 ✅ Password encryption (BCrypt)
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 Generate-monitoring-system-1-18/
-├── Back end/                 # Spring Boot backend
+├── Front_end/                      # Frontend Service (Next.js)
 │   ├── src/
-│   │   └── main/
-│   │       ├── java/com/generator/monitoring/
-│   │       │   ├── config/           # MQTT, WebSocket, Security config
-│   │       │   ├── controller/       # REST API controllers
-│   │       │   ├── dto/              # Data Transfer Objects
-│   │       │   ├── entity/           # JPA entities
-│   │       │   ├── enums/            # Threshold parameters
-│   │       │   ├── repository/       # Data repositories
-│   │       │   ├── security/         # JWT utilities & filters
-│   │       │   └── service/          # Business logic
-│   │       └── resources/
-│   │           └── application.properties
-│   └── pom.xml
+│   │   ├── app/                   # Next.js 14 App Router
+│   │   │   ├── page.tsx          # Landing page
+│   │   │   ├── login/            # Authentication
+│   │   │   ├── register/         # User registration
+│   │   │   ├── devices/          # Device listing
+│   │   │   ├── device/[id]/      # Device-specific pages
+│   │   │   │   ├── dashboard/   # Real-time monitoring
+│   │   │   │   ├── settings/    # Threshold config
+│   │   │   │   └── history/     # Historical data
+│   │   │   └── profile/         # User profile
+│   │   ├── components/          # Reusable React components
+│   │   ├── context/             # State management
+│   │   └── lib/                 # API client & utilities
+│   ├── Dockerfile              # Production Docker build
+│   ├── .dockerignore
+│   ├── package.json
+│   └── .env.example
 │
-└── Front_end/                # Next.js frontend
-    ├── src/
-    │   ├── app/              # Pages (Next.js App Router)
-    │   │   ├── device/[deviceId]/
-    │   │   │   ├── dashboard/    # Public dashboard
-    │   │   │   └── settings/     # Protected settings
-    │   │   ├── devices/          # Device listing
-    │   │   ├── login/            # Login page
-    │   │   └── register/         # Registration page
-    │   ├── components/       # Reusable components
-    │   ├── context/          # Auth context
-    │   └── lib/              # API utilities & WebSocket hook
-    └── package.json
+├── Back_end/                       # Backend Service (Spring Boot)
+│   ├── src/main/
+│   │   ├── java/com/generator/monitoring/
+│   │   │   ├── config/           # Configuration (MQTT, WebSocket, Security)
+│   │   │   ├── controller/       # REST API (5 controllers)
+│   │   │   ├── service/          # Business logic (13 services)
+│   │   │   ├── entity/           # JPA entities (8 tables)
+│   │   │   ├── repository/       # Data access layer
+│   │   │   ├── dto/              # Request/Response objects
+│   │   │   ├── security/         # JWT & authentication
+│   │   │   └── exception/        # Error handling
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       └── db/migration/     # Database migrations
+│   ├── Dockerfile              # Production Docker build
+│   ├── .dockerignore
+│   ├── pom.xml
+│   └── .env.example
+│
+├── nginx/                          # Reverse Proxy Configuration
+│   ├── nginx.conf              # Production NGINX config
+│   └── Dockerfile
+│
+├── mosquitto/                      # MQTT Broker Configuration
+│   └── mosquitto.conf
+│
+├── .github/workflows/              # CI/CD Pipelines
+│   ├── frontend-ci-cd.yml      # Frontend build & deploy
+│   └── backend-ci-cd.yml       # Backend build & deploy
+│
+├── docker-compose.yml              # Full stack orchestration
+├── .env.example                    # Environment template
+├── DEPLOYMENT.md                   # Production deployment guide
+└── README.md                       # This file
 ```
 
-## Quick Start
+## 🎯 Quick Start
 
-### Prerequisites
-- Java 17+
-- Node.js 18+
-- Maven 3.6+
-- Mosquitto MQTT Broker
+### Option 1: Docker (Recommended for Production)
 
-### 1. Setup Mosquitto MQTT Broker
+**Prerequisites**: Docker 24.0+, Docker Compose 2.20+
 
-#### Linux/Mac:
 ```bash
-# Install Mosquitto
-sudo apt-get install mosquitto mosquitto-clients  # Ubuntu/Debian
-# or
-brew install mosquitto  # macOS
+# 1. Clone repository
+git clone <repository-url>
+cd Generate-monitoring-system-1-18
 
-# Create mosquitto config
-cat > /etc/mosquitto/conf.d/default.conf <<EOF
-listener 1883
-allow_anonymous false
-password_file /etc/mosquitto/passwd
-EOF
+# 2. Configure environment
+cp .env.example .env
+nano .env  # Edit with your credentials
 
-# Create MQTT user
-sudo mosquitto_passwd -c /etc/mosquitto/passwd mqtt_user
+# Required:
+# - DATABASE_PASSWORD
+# - JWT_SECRET (generate: openssl rand -base64 64)
+# - MAIL_USERNAME & MAIL_PASSWORD
 
-# Restart Mosquitto
-sudo systemctl restart mosquitto
+# 3. Start all services
+docker-compose up -d
+
+# 4. Check status
+docker-compose ps
+
+# 5. View logs
+docker-compose logs -f
+
+# Access the application
+# → Frontend: http://localhost
+# → Backend API: http://localhost/api
+# → Health: http://localhost/health
 ```
 
-#### Windows:
-Download from https://mosquitto.org/download/ and configure similarly.
+**Services Started**:
+- ✅ NGINX (Port 80) - Reverse proxy
+- ✅ Frontend (Next.js) - User interface
+- ✅ Backend (Spring Boot) - REST API
+- ✅ PostgreSQL - Database
+- ✅ Mosquitto - MQTT broker
 
-### 2. Backend Setup
+---
 
+### Option 2: Local Development
+
+**Prerequisites**: Java 17+, Node.js 18+, Maven 3.6+, PostgreSQL, Mosquitto
+
+#### Backend Setup
 ```bash
-cd "Back end"
+cd Back_end
 
-# Configure environment variables (optional)
-export MOSQUITTO_HOST=localhost
-export MOSQUITTO_PORT=1883
-export MOSQUITTO_USERNAME=mqtt_user
-export MOSQUITTO_PASSWORD=your_password
+# Configure environment
+cp .env.example .env
+nano .env
 
 # Build and run
 mvn clean install
 mvn spring-boot:run
+
+# Backend runs on: http://localhost:8080
 ```
 
-Backend will start on http://localhost:8080
-
-### 3. Frontend Setup
-
+#### Frontend Setup
 ```bash
 cd Front_end
 
-# Install dependencies
-npm install
+# Configure environment
+cp .env.example .env.local
+nano .env.local
 
-# Run development server
+# Install and run
+npm install
 npm run dev
+
+# Frontend runs on: http://localhost:3000
 ```
 
-Frontend will start on http://localhost:3000
+#### MQTT Broker (Mosquitto)
+```bash
+# Ubuntu/Debian
+sudo apt-get install mosquitto
+
+# macOS
+brew install mosquitto
+
+# Start service
+sudo systemctl start mosquitto
+```
 
 ## Configuration
 
@@ -246,39 +352,51 @@ mosquitto_pub -h localhost -t "generator/GEN001/data" \
   }'
 ```
 
-## Deployment
+## 🚀 Deployment
 
-### Production Checklist
-- [ ] Change `jwt.secret` to a strong random value
-- [ ] Use production database (PostgreSQL/MySQL)
-- [ ] Enable HTTPS
-- [ ] Set `cookie.secure=true` for JWT cookies
-- [ ] Configure proper CORS origins
-- [ ] Use environment variables for secrets
+### Production Deployment
+
+See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for comprehensive production deployment guide including:
+- ☁️ Cloud provider setup (AWS, GCP, Azure)
+- 🔒 SSL/TLS configuration
+- 📊 Monitoring and logging
+- 🔄 CI/CD pipeline setup
+- 💾 Database backup strategies
+- 🔧 Performance tuning
+
+### Quick Production Checklist
+
+- [x] Multi-stage Docker builds (optimized images)
+- [x] NGINX reverse proxy with security headers
+- [x] Separate CI/CD pipelines for frontend/backend
+- [x] Health checks on all services
+- [ ] Configure SSL certificates (production domain)
+- [ ] Set strong `JWT_SECRET` (min 64 chars)
+- [ ] Configure production database backups
 - [ ] Set up proper MQTT authentication
 - [ ] Configure firewall rules
-- [ ] Set up logging and monitoring
+- [ ] Set up application monitoring (optional)
 
-### Docker Deployment (Optional)
+### Docker Images
 
-**Backend Dockerfile:**
-```dockerfile
-FROM openjdk:17-slim
-COPY target/*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app.jar"]
-```
+Pre-built production Docker images:
+- **Frontend**: Multi-stage build with Node.js 18 Alpine
+- **Backend**: Multi-stage Maven build with Eclipse Temurin 17
+- **NGINX**: Optimized reverse proxy with gzip, rate limiting, security headers
 
-**Frontend Dockerfile:**
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-EXPOSE 3000
-CMD ["npm", "start"]
+### Environment Variables
+
+```bash
+# Required for production
+DATABASE_PASSWORD=<secure-password>
+JWT_SECRET=<64-char-random-string>
+MAIL_USERNAME=<email>
+MAIL_PASSWORD=<app-password>
+
+# Optional
+NEXT_PUBLIC_API_URL=https://api.yourdomain.com
+NEXT_PUBLIC_WS_URL=wss://api.yourdomain.com/ws
+NGINX_PORT=80
 ```
 
 ## Troubleshooting

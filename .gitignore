@@ -1,0 +1,58 @@
+# ================================
+# Environment Variables
+# ================================
+.env
+.env.local
+.env.production
+.env.*.local
+
+# ================================
+# Docker
+# ================================
+docker-compose.override.yml
+
+# ================================
+# Logs
+# ================================
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ================================
+# OS
+# ================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ================================
+# IDE
+# ================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ================================
+# Temporary Files
+# ================================
+tmp/
+temp/
+*.tmp
+
+# ================================
+# Backups
+# ================================
+backups/
+*.bak
+*.backup
