@@ -11,6 +11,7 @@ interface Device {
   name: string;
   location: string;
   active: boolean;
+  licenseEnabled: boolean;
   lastSeenAt: string | null;
 }
 
@@ -152,6 +153,45 @@ export default function DashboardPage() {
     ctx.font = '11px Arial';
     ctx.fillText('RPM', centerX, centerY + 50);
   };
+
+  // License check - show blocked page if license is disabled
+  if (device && device.licenseEnabled === false) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+            {/* Lock icon */}
+            <div className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
+              <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">License Disabled</h1>
+
+            {/* Device info */}
+            <p className="text-sm text-gray-500 mb-4">
+              Device: <span className="font-medium text-gray-700">{device.name}</span> ({deviceId})
+            </p>
+
+            {/* Message */}
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              You do not have an active license to access this device.
+              Please contact your administrator to enable the license for this device.
+            </p>
+
+            {/* Divider */}
+            <div className="border-t border-gray-200 pt-5">
+              <p className="text-xs text-gray-400">
+                If you believe this is an error, please reach out to your system administrator.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const telemetry = data?.telemetry;
   const allAlarms = [
