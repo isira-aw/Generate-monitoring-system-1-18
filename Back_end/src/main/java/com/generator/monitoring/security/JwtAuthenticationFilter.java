@@ -50,7 +50,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractTokenFromCookie(HttpServletRequest request) {
+        // Check Authorization header first (used by admin panel)
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
         if (request.getCookies() != null) {
+            // Check admin_jwt cookie first, then regular jwt cookie
+            String adminToken = Arrays.stream(request.getCookies())
+                    .filter(cookie -> "admin_jwt".equals(cookie.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+
+            if (adminToken != null && !adminToken.isEmpty()) {
+                return adminToken;
+            }
+
             return Arrays.stream(request.getCookies())
                     .filter(cookie -> "jwt".equals(cookie.getName()))
                     .map(Cookie::getValue)
