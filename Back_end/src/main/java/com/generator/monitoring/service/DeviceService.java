@@ -418,7 +418,7 @@ public class DeviceService {
                 device.getName(),
                 device.getLocation(),
                 device.getActive(),
-                device.getLicenseEnabled(),
+                device.getLicenseEnabled() != null ? device.getLicenseEnabled() : true,
                 device.getLastSeenAt()
         );
     }

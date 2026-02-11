@@ -43,7 +43,7 @@ public class Device {
     @Column(nullable = false)
     private Boolean active = true;
 
-    @Column(nullable = false)
+    @Column
     private Boolean licenseEnabled = true;
 
     @Column(nullable = false)

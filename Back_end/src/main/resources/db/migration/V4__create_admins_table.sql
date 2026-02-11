@@ -8,4 +8,7 @@ CREATE TABLE IF NOT EXISTS admins (
 );
 
 -- Add license_enabled column to devices table
-ALTER TABLE devices ADD COLUMN IF NOT EXISTS license_enabled BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE devices ADD COLUMN IF NOT EXISTS license_enabled BOOLEAN DEFAULT TRUE;
+
+-- Update any existing NULL values to TRUE
+UPDATE devices SET license_enabled = TRUE WHERE license_enabled IS NULL;
