@@ -6,6 +6,43 @@ body {
   @apply bg-gray-50 text-gray-900;
 }
 
+body.theme-applied {
+  background-color: #d9d9d9 !important;
+}
+
+body.theme-applied .card {
+  background-color: white !important;
+}
+
+body.theme-applied .btn-primary {
+  background-color: #1E40AF !important;
+  color: white !important;
+}
+
+body.theme-applied .input {
+  background-color: white !important;
+  border-color: #1E40AF !important;
+  color: #1E40AF !important;
+}
+
+body.theme-applied .input::placeholder {
+  color: rgba(30, 64, 175, 0.5) !important;
+}
+
+body.theme-applied h1, 
+body.theme-applied h2, 
+body.theme-applied h3 {
+  color: #1E40AF !important;
+}
+
+body.theme-applied p {
+  color: #1E40AF !important;
+}
+
+body.theme-applied a {
+  color: #1E40AF !important;
+}
+
 .card {
   @apply bg-white rounded-lg shadow-md p-6;
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import Navigation from '@/components/Navigationbar';
+import ThemeWrapper from '@/components/ThemeWrapper';
 
 export const metadata: Metadata = {
   title: 'Generator Monitoring System',
@@ -17,8 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body className="font-sans antialiased">
         <AuthProvider>
-          <Navigation />
-          <main>{children}</main>
+          <ThemeWrapper>
+            <Navigation />
+            <main>{children}</main>
+          </ThemeWrapper>
         </AuthProvider>
       </body>
     </html>

@@ -47,7 +47,6 @@ export default function ProfilePage() {
         mobileNumber,
       });
       setProfileSuccess('Profile updated successfully!');
-      // Refresh user data
       await checkAuth();
     } catch (err: any) {
       setProfileError(err.response?.data?.message || 'Failed to update profile');
@@ -94,148 +93,148 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-            <br /><br />
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
+    <div className="min-h-screen bg-[#d9d9d9]">
+      <div className="container mx-auto px-4 py-8">
+        <br /><br />
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8 text-[#1E40AF]">Account Settings</h1>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Profile Information */}
-          <div className="card">
-            <h2 className="text-2xl font-bold mb-6">Profile Information</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+              <h2 className="text-2xl font-bold mb-6 text-[#1E40AF]">Profile Information</h2>
 
-            {profileError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {profileError}
-              </div>
-            )}
+              {profileError && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  {profileError}
+                </div>
+              )}
 
-            {profileSuccess && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {profileSuccess}
-              </div>
-            )}
+              {profileSuccess && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                  {profileSuccess}
+                </div>
+              )}
 
-            <form onSubmit={handleProfileUpdate}>
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="name">
-                  Full Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  className="input"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
+              <form onSubmit={handleProfileUpdate}>
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2 font-medium" htmlFor="name">
+                    Full Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="email">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  className="input"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2 font-medium" htmlFor="email">
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
 
-              <div className="mb-6">
-                <label className="block text-gray-700 mb-2" htmlFor="mobileNumber">
-                  Mobile Number
-                </label>
-                <input
-                  id="mobileNumber"
-                  type="tel"
-                  className="input"
-                  value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                  required
-                />
-              </div>
+                <div className="mb-6">
+                  <label className="block text-gray-700 mb-2 font-medium" htmlFor="mobileNumber">
+                    Mobile Number
+                  </label>
+                  <input
+                    id="mobileNumber"
+                    type="tel"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    required
+                  />
+                </div>
 
-              <button
-                type="submit"
-                className="btn btn-primary w-full"
-                disabled={profileLoading}
-              >
-                {profileLoading ? 'Updating...' : 'Update Profile'}
-              </button>
-            </form>
-          </div>
+                <button
+                  type="submit"
+                  className="w-full bg-[#1E40AF] text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+                  disabled={profileLoading}
+                >
+                  {profileLoading ? 'Updating...' : 'Update Profile'}
+                </button>
+              </form>
+            </div>
 
-          {/* Change Password */}
-          <div className="card">
-            <h2 className="text-2xl font-bold mb-6">Change Password</h2>
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+              <h2 className="text-2xl font-bold mb-6 text-[#1E40AF]">Change Password</h2>
 
-            {passwordError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {passwordError}
-              </div>
-            )}
+              {passwordError && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  {passwordError}
+                </div>
+              )}
 
-            {passwordSuccess && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {passwordSuccess}
-              </div>
-            )}
+              {passwordSuccess && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                  {passwordSuccess}
+                </div>
+              )}
 
-            <form onSubmit={handlePasswordChange}>
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="currentPassword">
-                  Current Password
-                </label>
-                <input
-                  id="currentPassword"
-                  type="password"
-                  className="input"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
-                />
-              </div>
+              <form onSubmit={handlePasswordChange}>
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2 font-medium" htmlFor="currentPassword">
+                    Current Password
+                  </label>
+                  <input
+                    id="currentPassword"
+                    type="password"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                  />
+                </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="newPassword">
-                  New Password
-                </label>
-                <input
-                  id="newPassword"
-                  type="password"
-                  className="input"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                />
-              </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2 font-medium" htmlFor="newPassword">
+                    New Password
+                  </label>
+                  <input
+                    id="newPassword"
+                    type="password"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
 
-              <div className="mb-6">
-                <label className="block text-gray-700 mb-2" htmlFor="confirmPassword">
-                  Confirm New Password
-                </label>
-                <input
-                  id="confirmPassword"
-                  type="password"
-                  className="input"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-              </div>
+                <div className="mb-6">
+                  <label className="block text-gray-700 mb-2 font-medium" htmlFor="confirmPassword">
+                    Confirm New Password
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
 
-              <button
-                type="submit"
-                className="btn btn-primary w-full"
-                disabled={passwordLoading}
-              >
-                {passwordLoading ? 'Changing...' : 'Change Password'}
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  className="w-full bg-[#1E40AF] text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+                  disabled={passwordLoading}
+                >
+                  {passwordLoading ? 'Changing...' : 'Change Password'}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>

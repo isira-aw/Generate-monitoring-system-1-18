@@ -1,0 +1,56 @@
+package com.generator.monitoring.config;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Arrays;
+
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class CorsFilterConfig extends OncePerRequestFilter {
+
+    @Value("${cors.allowed.origins}")
+    private String allowedOrigins;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        
+        String origin = request.getHeader("Origin");
+        
+        // Check if the origin is allowed
+        if (origin != null && isAllowedOrigin(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            response.setHeader("Access-Control-Allow-Headers", "*");
+            response.setHeader("Access-Control-Expose-Headers", "Set-Cookie, Authorization");
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Max-Age", "3600");
+        }
+        
+        // Handle OPTIONS preflight requests
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+        
+        filterChain.doFilter(request, response);
+    }
+    
+    private boolean isAllowedOrigin(String origin) {
+        if (allowedOrigins == null || allowedOrigins.isEmpty()) {
+            return true; // Allow all if not configured
+        }
+        return Arrays.asList(allowedOrigins.split(","))
+                .stream()
+                .anyMatch(allowed -> allowed.trim().equals(origin));
+    }
+}

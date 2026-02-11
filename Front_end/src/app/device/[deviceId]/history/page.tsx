@@ -15,7 +15,6 @@ interface HistoryDataPoint {
   parameters: Record<string, any>;
 }
 
-// Declare ApexCharts type for TypeScript
 declare const ApexCharts: any;
 
 export default function HistoryPage() {
@@ -43,7 +42,6 @@ export default function HistoryPage() {
     loadDeviceInfo();
     loadParameters();
 
-    // Load ApexCharts script
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/apexcharts';
     script.async = true;
@@ -52,20 +50,17 @@ export default function HistoryPage() {
     };
     document.head.appendChild(script);
 
-    // Set default dates (last 24 hours)
     const now = new Date();
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     setEndDate(formatDateTimeLocal(now));
     setStartDate(formatDateTimeLocal(yesterday));
 
-    // Set default date for chart (today)
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     setSelectedDate(`${year}-${month}-${day}`);
 
     return () => {
-      // Cleanup charts on unmount
       if (chart1Ref.current) {
         chart1Ref.current.destroy();
       }
@@ -103,8 +98,6 @@ export default function HistoryPage() {
     try {
       const params = await historyApi.getParameters();
       setAvailableParameters(params);
-
-      // Select default parameters
       const defaultParams = [
         'rpm', 'generatorFrequency', 'generatorVoltageL1N',
         'generatorCurrentL1', 'generatorPL1', 'batteryVolts',
@@ -117,7 +110,6 @@ export default function HistoryPage() {
   };
 
   const renderCharts = () => {
-    // Destroy existing charts
     if (chart1Ref.current) {
       chart1Ref.current.destroy();
     }
@@ -125,73 +117,45 @@ export default function HistoryPage() {
       chart2Ref.current.destroy();
     }
 
-    // Process data with time gap filling
     const processedData = fillTimeGaps(chartData);
-
-    // Prepare data for ApexCharts
     const seriesData = processedData.map(point => [
       new Date(point.timestamp).getTime(),
       point.rpm
     ]);
 
-    // Main area chart options
     const options1 = {
       chart: {
         id: 'chart2',
         type: 'area',
         height: 350,
-        foreColor: '#6b7280',
+        foreColor: '#1E40AF',
         toolbar: {
           autoSelected: 'pan',
           show: true,
           tools: {
-            download: true,
-            selection: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            reset: true
+            download: true, selection: true, zoom: true, zoomin: true, zoomout: true, pan: true, reset: true
           }
         }
       },
-      colors: ['#3b82f6'],
-      stroke: {
-        width: 3,
-        curve: 'smooth'
-      },
+      colors: ['#1E40AF'],
+      stroke: { width: 3, curve: 'smooth' },
       grid: {
         borderColor: '#e5e7eb',
         clipMarkers: false,
-        yaxis: {
-          lines: {
-            show: true
-          }
-        }
+        yaxis: { lines: { show: true } }
       },
-      dataLabels: {
-        enabled: false
-      },
+      dataLabels: { enabled: false },
       fill: {
-        gradient: {
-          enabled: true,
-          opacityFrom: 0.55,
-          opacityTo: 0
-        }
+        gradient: { enabled: true, opacityFrom: 0.55, opacityTo: 0 }
       },
       markers: {
         size: 0,
         colors: ['#ffffff'],
-        strokeColor: '#3b82f6',
+        strokeColor: '#1E40AF',
         strokeWidth: 2,
-        hover: {
-          size: 7
-        }
+        hover: { size: 7 }
       },
-      series: [{
-        name: 'RPM',
-        data: seriesData
-      }],
+      series: [{ name: 'RPM', data: seriesData }],
       tooltip: {
         theme: 'light',
         x: {
@@ -202,128 +166,60 @@ export default function HistoryPage() {
             const day = String(date.getDate()).padStart(2, '0');
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
           }
         },
-        y: {
-          formatter: function(value: number) {
-            return value.toFixed(2) + ' RPM';
-          }
-        }
+        y: { formatter: function(value: number) { return value.toFixed(2) + ' RPM'; } }
       },
       xaxis: {
         type: 'datetime',
-        labels: {
-          format: 'HH:mm',
-          datetimeUTC: false,
-          datetimeFormatter: {
-            year: 'yyyy',
-            month: 'MMM \'yy',
-            day: 'dd MMM',
-            hour: 'HH:mm',
-            minute: 'HH:mm'
-          }
-        }
+        labels: { format: 'HH:mm', datetimeUTC: false }
       },
       yaxis: {
         min: 0,
         tickAmount: 4,
-        labels: {
-          formatter: function(value: number) {
-            return value.toFixed(0);
-          }
-        },
-        title: {
-          text: 'RPM (Average per Minute)',
-          style: {
-            color: '#374151',
-            fontSize: '14px',
-            fontWeight: 600
-          }
-        }
+        labels: { formatter: function(value: number) { return value.toFixed(0); } },
+        title: { text: 'RPM (Average per Minute)', style: { color: '#1E40AF', fontSize: '14px', fontWeight: 600 } }
       },
       annotations: {
         yaxis: [{
           y: 0,
           borderColor: '#ef4444',
           strokeDashArray: 5,
-          label: {
-            borderColor: '#ef4444',
-            style: {
-              color: '#fff',
-              background: '#ef4444'
-            },
-            text: 'Zero RPM'
-          }
+          label: { borderColor: '#ef4444', style: { color: '#ffffff', background: '#ef4444' }, text: 'Zero RPM' }
         }]
       }
     };
 
-    // Brush chart options
     const options2 = {
       chart: {
         id: 'chart1',
         height: 130,
         type: 'area',
-        foreColor: '#6b7280',
-        brush: {
-          target: 'chart2',
-          enabled: true
-        },
-        selection: {
-          enabled: true,
-          fill: {
-            color: '#3b82f6',
-            opacity: 0.1
-          }
-        }
+        foreColor: '#1E40AF',
+        brush: { target: 'chart2', enabled: true },
+        selection: { enabled: true, fill: { color: '#1E40AF', opacity: 0.1 } }
       },
-      colors: ['#ef4444'],
-      series: [{
-        name: 'RPM',
-        data: seriesData
-      }],
-      stroke: {
-        width: 2
-      },
-      grid: {
-        borderColor: '#e5e7eb'
-      },
-      markers: {
-        size: 0
-      },
+      colors: ['#1E40AF'],
+      series: [{ name: 'RPM', data: seriesData }],
+      stroke: { width: 2 },
+      grid: { borderColor: '#e5e7eb' },
+      markers: { size: 0 },
       xaxis: {
         type: 'datetime',
-        labels: {
-          format: 'HH:mm',
-          datetimeUTC: false
-        },
-        tooltip: {
-          enabled: false
-        }
+        labels: { format: 'HH:mm', datetimeUTC: false },
+        tooltip: { enabled: false }
       },
-      yaxis: {
-        tickAmount: 2,
-        labels: {
-          formatter: function(value: number) {
-            return value.toFixed(0);
-          }
-        }
-      },
-      legend: {
-        show: false
-      }
+      yaxis: { tickAmount: 2, labels: { formatter: function(value: number) { return value.toFixed(0); } } },
+      legend: { show: false }
     };
 
-    // Render charts
     const chartElement1 = document.querySelector('#chart-area');
     const chartElement2 = document.querySelector('#chart-bar');
 
     if (chartElement1 && chartElement2 && typeof ApexCharts !== 'undefined') {
       chart1Ref.current = new ApexCharts(chartElement1, options1);
       chart2Ref.current = new ApexCharts(chartElement2, options2);
-
       chart1Ref.current.render();
       chart2Ref.current.render();
     }
@@ -331,34 +227,24 @@ export default function HistoryPage() {
 
   const fillTimeGaps = (data: { timestamp: string; rpm: number }[]) => {
     if (data.length === 0) return data;
-
     const result: { timestamp: string; rpm: number }[] = [];
-    const sortedData = [...data].sort((a, b) => 
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    );
+    const sortedData = [...data].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
     for (let i = 0; i < sortedData.length; i++) {
       result.push(sortedData[i]);
-
       if (i < sortedData.length - 1) {
         const currentTime = new Date(sortedData[i].timestamp).getTime();
         const nextTime = new Date(sortedData[i + 1].timestamp).getTime();
         const gap = nextTime - currentTime;
-
-        // If gap is greater than 1 minute (60000ms), fill with zeros
         if (gap > 60000) {
           let fillTime = currentTime + 60000;
           while (fillTime < nextTime) {
-            result.push({
-              timestamp: new Date(fillTime).toISOString(),
-              rpm: 0
-            });
-            fillTime += 60000; // Add 1 minute
+            result.push({ timestamp: new Date(fillTime).toISOString(), rpm: 0 });
+            fillTime += 60000;
           }
         }
       }
     }
-
     return result;
   };
 
@@ -372,25 +258,14 @@ export default function HistoryPage() {
     });
   };
 
-  const handleSelectAll = () => {
-    setSelectedParameters(Object.keys(availableParameters));
-  };
-
-  const handleDeselectAll = () => {
-    setSelectedParameters([]);
-  };
-
   const handleLoadChartData = async () => {
     if (!selectedDate) {
       setError('Please select a date');
       return;
     }
-
     setChartLoading(true);
     setError('');
-
     try {
-      // Call backend endpoint that returns averaged RPM data
       const data = await historyApi.getRpmChartData(deviceId, selectedDate);
       setChartData(data);
     } catch (err: any) {
@@ -406,26 +281,16 @@ export default function HistoryPage() {
       setError('Please select both start and end dates');
       return;
     }
-
     if (selectedParameters.length === 0) {
       setError('Please select at least one parameter');
       return;
     }
-
     setLoading(true);
     setError('');
-
     try {
       const startTime = new Date(startDate).toISOString();
       const endTime = new Date(endDate).toISOString();
-
-      const data = await historyApi.queryHistory({
-        deviceId,
-        startTime,
-        endTime,
-        parameters: selectedParameters,
-      });
-
+      const data = await historyApi.queryHistory({ deviceId, startTime, endTime, parameters: selectedParameters });
       setHistoryData(data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load historical data');
@@ -439,20 +304,11 @@ export default function HistoryPage() {
       setError('Please select dates and parameters first');
       return;
     }
-
     setLoading(true);
     try {
       const startTime = new Date(startDate).toISOString();
       const endTime = new Date(endDate).toISOString();
-
-      const blob = await historyApi.generatePdfReport({
-        deviceId,
-        startTime,
-        endTime,
-        parameters: selectedParameters,
-      });
-
-      // Download the PDF
+      const blob = await historyApi.generatePdfReport({ deviceId, startTime, endTime, parameters: selectedParameters });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -475,296 +331,130 @@ export default function HistoryPage() {
     return value.toString();
   };
 
-  const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString();
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-[#d9d9d9] p-4">
       <br /><br />
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">Documents and History</h1>
+              <h1 className="text-3xl font-bold text-[#1E40AF]">Documents and History</h1>
               {device && (
-                <p className="text-gray-600 mt-2">
-                  {device.name} ({device.deviceId})
-                </p>
+                <p className="text-gray-600 mt-2">{device.name} ({device.deviceId})</p>
               )}
             </div>
             <button
               onClick={() => router.push(`/device/${deviceId}/dashboard`)}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition"
+              className="bg-[#1E40AF] hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
             >
               Back to Dashboard
             </button>
           </div>
         </div>
 
-        {/* RPM Area Chart Section - ApexCharts with zero value handling */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            RPM Area Chart
-          </h2>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Date
-              </label>
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 className="text-xl font-bold text-[#1E40AF] mb-4">RPM Chart</h2>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2 font-medium">Select Date</label>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
               />
             </div>
-            <div className="flex items-end">
-              <button
-                onClick={handleLoadChartData}
-                disabled={chartLoading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition flex items-center"
-              >
-                {chartLoading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Loading...
-                  </>
-                ) : (
-                  'Load Chart Data'
-                )}
-              </button>
-            </div>
+            <button
+              onClick={handleLoadChartData}
+              disabled={chartLoading}
+              className="w-full bg-[#1E40AF] text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+              {chartLoading ? 'Loading...' : 'Load Chart Data'}
+            </button>
+            <div id="chart-area" className="mt-4" />
+            <div id="chart-bar" className="mt-2" />
           </div>
 
-          {chartData.length > 0 && (
-            <div className="mt-6">
-              {/* <div className="bg-blue-50 border border-blue-200 p-3 rounded-md mb-4">
-                <p className="text-sm text-blue-800">
-                  <strong>📊 Data Points:</strong> {chartData.length} minutes | 
-                  <strong> Zero Values:</strong> {chartData.filter(d => d.rpm === 0).length} minutes | 
-                  <strong> Active:</strong> {chartData.filter(d => d.rpm > 0).length} minutes
-                </p>
-              </div> */}
-
-              {/* ApexCharts Container */}
-              <div id="chart-area" className="mb-4"></div>
-              <div id="chart-bar"></div>
-
-              {/* Data Table */}
-              <div className="mt-6 bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <div className="max-h-96 overflow-y-auto">
-                  {/* <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50 sticky top-0">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Time
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Average RPM
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {chartData.map((point, index) => {
-                        const time = new Date(point.timestamp);
-                        const isZero = point.rpm === 0;
-                        
-                        // Format time consistently
-                        const hours = time.getHours().toString().padStart(2, '0');
-                        const minutes = time.getMinutes().toString().padStart(2, '0');
-                        const seconds = time.getSeconds().toString().padStart(2, '0');
-                        const formattedTime = `${hours}:${minutes}:${seconds}`;
-                        
-                        return (
-                          <tr key={index} className={`hover:bg-gray-50 ${isZero ? 'bg-red-50' : ''}`}>
-                            <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
-                              {formattedTime}
-                            </td>
-                            <td className={`px-6 py-2 whitespace-nowrap text-sm font-medium ${isZero ? 'text-red-600' : 'text-gray-900'}`}>
-                              {point.rpm.toFixed(2)}
-                            </td>
-                            <td className="px-6 py-2 whitespace-nowrap text-sm">
-                              {isZero ? (
-                                <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                  Zero RPM
-                                </span>
-                              ) : (
-                                <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                  Active
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table> */}
-                </div>
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 className="text-xl font-bold text-[#1E40AF] mb-4">Parameters</h2>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2 font-medium">Select Parameters</label>
+              <div className="max-h-60 overflow-y-auto border border-gray-200 rounded p-2">
+                {Object.entries(availableParameters).map(([key, label]) => (
+                  <label key={key} className="flex items-center gap-2 py-1 text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedParameters.includes(key)}
+                      onChange={() => handleParameterToggle(key)}
+                      className="rounded text-[#1E40AF] focus:ring-[#1E40AF]"
+                    />
+                    {label}
+                  </label>
+                ))}
               </div>
             </div>
-          )}
-
-          {chartData.length === 0 && !chartLoading && (
-            <div className="mt-6 p-4 bg-gray-100 rounded-md text-center text-gray-600">
-              Select a date and click "Load Chart Data" to view the RPM chart
+            <div className="flex gap-2 mb-4">
+              <button onClick={() => setSelectedParameters(Object.keys(availableParameters))} className="flex-1 bg-gray-100 text-[#1E40AF] py-2 rounded-lg font-medium hover:bg-gray-200">
+                Select All
+              </button>
+              <button onClick={() => setSelectedParameters([])} className="flex-1 bg-gray-100 text-[#1E40AF] py-2 rounded-lg font-medium hover:bg-gray-200">
+                Deselect All
+              </button>
             </div>
-          )}
-        </div>
-
-        {/* Date Selection */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Select Time Period</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Start Date & Time
-              </label>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2 font-medium">Start Date/Time</label>
               <input
                 type="datetime-local"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                End Date & Time
-              </label>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2 font-medium">End Date/Time</label>
               <input
                 type="datetime-local"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
               />
             </div>
-          </div>
-        </div>
-
-        {/* Parameter Selection */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">Select Parameters</h2>
-            <div className="space-x-2">
-              <button
-                onClick={handleSelectAll}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                Select All
+            <div className="flex gap-2">
+              <button onClick={handleQuery} disabled={loading} className="flex-1 bg-[#1E40AF] text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                {loading ? 'Loading...' : 'Query Data'}
               </button>
-              <span className="text-gray-400">|</span>
-              <button
-                onClick={handleDeselectAll}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                Deselect All
+              <button onClick={handleGeneratePdf} disabled={loading} className="flex-1 bg-[#1E40AF] text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                Generate PDF
               </button>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-96 overflow-y-auto p-2">
-            {Object.entries(availableParameters).map(([key, displayName]) => (
-              <label
-                key={key}
-                className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedParameters.includes(key)}
-                  onChange={() => handleParameterToggle(key)}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">{displayName}</span>
-              </label>
-            ))}
-          </div>
-
-          <div className="mt-4 text-sm text-gray-600">
-            Selected: {selectedParameters.length} parameter(s)
-          </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-wrap gap-4">
-            <button
-              onClick={handleQuery}
-              disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition flex items-center"
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Loading...
-                </>
-              ) : (
-                'View Data'
-              )}
-            </button>
-
-            <button
-              onClick={handleGeneratePdf}
-              disabled={loading}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition"
-            >
-              Generate PDF Report
-            </button>
-          </div>
-
-          {error && (
-            <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
-            </div>
-          )}
-        </div>
-
-        {/* Data Table */}
         {historyData.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Historical Data ({historyData.length} records)
-            </h2>
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <h2 className="text-xl font-bold text-[#1E40AF] mb-4">Historical Data</h2>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Timestamp
-                    </th>
-                    {selectedParameters.map((param) => (
-                      <th
-                        key={param}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        {availableParameters[param] || param}
-                      </th>
+              <table className="w-full text-sm text-gray-700">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-2 px-2 font-semibold text-[#1E40AF]">Timestamp</th>
+                    {selectedParameters.map(param => (
+                      <th key={param} className="text-left py-2 px-2 font-semibold text-[#1E40AF]">{availableParameters[param] || param}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {historyData.map((dataPoint, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                        {formatTimestamp(dataPoint.timestamp)}
-                      </td>
-                      {selectedParameters.map((param) => (
-                        <td
-                          key={param}
-                          className="px-4 py-3 whitespace-nowrap text-sm text-gray-700"
-                        >
-                          {formatValue(dataPoint.parameters[param])}
-                        </td>
+                <tbody>
+                  {historyData.map((point, index) => (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-2 px-2">{new Date(point.timestamp).toLocaleString()}</td>
+                      {selectedParameters.map(param => (
+                        <td key={param} className="py-2 px-2">{formatValue(point.parameters[param])}</td>
                       ))}
                     </tr>
                   ))}

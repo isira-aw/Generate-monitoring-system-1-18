@@ -37,33 +37,21 @@ export default function DashboardPage() {
           label: 'Total Admins',
           value: stats.totalAdmins,
           icon: Users,
-          color: 'bg-purple-500',
-          bgColor: 'bg-purple-50',
-          textColor: 'text-purple-700',
         },
         {
           label: 'Total Devices',
           value: stats.totalDevices,
           icon: Monitor,
-          color: 'bg-blue-500',
-          bgColor: 'bg-blue-50',
-          textColor: 'text-blue-700',
         },
         {
           label: 'Active Devices',
           value: stats.activeDevices,
           icon: Wifi,
-          color: 'bg-green-500',
-          bgColor: 'bg-green-50',
-          textColor: 'text-green-700',
         },
         {
           label: 'Licensed Devices',
           value: stats.licensedDevices,
           icon: KeyRound,
-          color: 'bg-amber-500',
-          bgColor: 'bg-amber-50',
-          textColor: 'text-amber-700',
         },
       ]
     : [];
@@ -71,8 +59,8 @@ export default function DashboardPage() {
   return (
     <ProtectedLayout>
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Dashboard</h1>
-        <p className="text-gray-500 mb-8">Overview of the monitoring system</p>
+        <h1 className="text-2xl font-bold text-[#1E40AF] mb-1">Dashboard</h1>
+        <p className="text-gray-600 mb-8">Overview of the monitoring system</p>
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -89,12 +77,12 @@ export default function DashboardPage() {
             {statCards.map((card) => {
               const Icon = card.icon;
               return (
-                <div key={card.label} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                  <div className={`w-12 h-12 ${card.bgColor} rounded-lg flex items-center justify-center mb-4`}>
-                    <Icon className={`w-6 h-6 ${card.textColor}`} />
+                <div key={card.label} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                  <div className="w-12 h-12 bg-[#1E40AF] rounded-lg flex items-center justify-center mb-4">
+                    <Icon className="w-6 h-6 text-white" />
                   </div>
                   <p className="text-sm text-gray-500 mb-1">{card.label}</p>
-                  <p className="text-3xl font-bold text-gray-900">{card.value}</p>
+                  <p className="text-3xl font-bold text-[#1E40AF]">{card.value}</p>
                 </div>
               );
             })}

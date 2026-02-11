@@ -21,7 +21,6 @@ export default function RegisterDevicePage() {
     setError('');
     setSuccess(false);
 
-    // Validation
     if (!formData.deviceId.trim()) {
       setError('Device ID is required');
       return;
@@ -51,7 +50,6 @@ export default function RegisterDevicePage() {
       setSuccess(true);
       setFormData({ deviceId: '', devicePassword: '', name: '', location: '' });
 
-      // Optionally redirect after success
       setTimeout(() => {
         router.push('/devices');
       }, 2000);
@@ -68,10 +66,10 @@ export default function RegisterDevicePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-[#d9d9d9] py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <h1 className="text-3xl font-bold mb-2 text-center">Register New Device</h1>
+        <div className="bg-white rounded-lg shadow-xl p-8 border border-gray-200">
+          <h1 className="text-3xl font-bold mb-2 text-center text-[#1E40AF]">Register New Device</h1>
           <p className="text-gray-600 text-center mb-8">
             Register a new generator device that can be assigned to multiple users
           </p>
@@ -96,7 +94,7 @@ export default function RegisterDevicePage() {
               <input
                 type="text"
                 id="deviceId"
-                className="input w-full"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
                 placeholder="e.g., GEN001"
                 value={formData.deviceId}
                 onChange={(e) => setFormData({ ...formData, deviceId: e.target.value })}
@@ -115,7 +113,7 @@ export default function RegisterDevicePage() {
               <input
                 type="password"
                 id="devicePassword"
-                className="input w-full"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
                 placeholder="Enter a secure password"
                 value={formData.devicePassword}
                 onChange={(e) => setFormData({ ...formData, devicePassword: e.target.value })}
@@ -134,7 +132,7 @@ export default function RegisterDevicePage() {
               <input
                 type="text"
                 id="name"
-                className="input w-full"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
                 placeholder="e.g., Main Building Generator"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -153,7 +151,7 @@ export default function RegisterDevicePage() {
               <input
                 type="text"
                 id="location"
-                className="input w-full"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1E40AF] bg-gray-50"
                 placeholder="e.g., Building A, Floor 1"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -165,9 +163,9 @@ export default function RegisterDevicePage() {
               </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-blue-900 mb-2">Multi-User Support</h3>
-              <p className="text-sm text-blue-800">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-[#1E40AF] mb-2">Multi-User Support</h3>
+              <p className="text-sm text-gray-600">
                 Once registered, this device can be assigned to multiple users. Users can attach the device
                 to their account using the Device ID and Password from the "My Devices" page.
               </p>
@@ -177,14 +175,14 @@ export default function RegisterDevicePage() {
               <button
                 type="button"
                 onClick={() => router.push('/')}
-                className="btn btn-secondary flex-1"
+                className="flex-1 bg-gray-100 text-[#1E40AF] py-3 rounded-lg font-medium hover:bg-gray-200"
                 disabled={submitting}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn btn-primary flex-1"
+                className="flex-1 bg-[#1E40AF] text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
                 disabled={submitting}
               >
                 {submitting ? 'Registering...' : 'Register Device'}
@@ -193,8 +191,8 @@ export default function RegisterDevicePage() {
           </form>
         </div>
 
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Registration Instructions</h2>
+        <div className="mt-8 bg-white rounded-lg shadow p-6 border border-gray-200">
+          <h2 className="text-xl font-semibold mb-4 text-[#1E40AF]">Registration Instructions</h2>
           <ol className="list-decimal list-inside space-y-2 text-gray-700">
             <li>Fill in all required fields marked with <span className="text-red-500">*</span></li>
             <li>Choose a unique Device ID that will be used in MQTT topics (format: generator/DEVICE_ID/data)</li>
