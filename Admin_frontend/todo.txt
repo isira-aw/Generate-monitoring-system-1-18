@@ -1,0 +1,3 @@
+In this folder you need to add full admin panel using that admin admins can add a new admin Another thing is he can manage device register device and he can given license enable or disable for the its mean we can consider one device admin Disable the license of access any user cannot access the device that same admin enable again users can access device and monitoring that device again,
+In device registrations also include in this an edit passwords and you can do here,
+As a permanent admin need to include there because admin cannot register without login first credentials for the first admin(isira.aw@gmail.com-password-000000)
