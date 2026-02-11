@@ -9,12 +9,9 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeviceDto {
+public class AdminDto {
     private Long id;
-    private String deviceId;
+    private String email;
     private String name;
-    private String location;
-    private Boolean active;
-    private Boolean licenseEnabled;
-    private LocalDateTime lastSeenAt;
+    private LocalDateTime createdAt;
 }

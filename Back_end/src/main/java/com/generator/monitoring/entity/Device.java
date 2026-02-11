@@ -44,6 +44,9 @@ public class Device {
     private Boolean active = true;
 
     @Column(nullable = false)
+    private Boolean licenseEnabled = true;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @Column

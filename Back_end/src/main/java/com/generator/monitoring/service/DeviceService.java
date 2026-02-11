@@ -367,6 +367,50 @@ public class DeviceService {
         return mapToDto(saved);
     }
 
+    @Transactional
+    public void adminUpdateDevicePassword(String deviceId, String newPassword) {
+        logger.info("Admin updating password for device: {}", deviceId);
+
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            throw new InvalidInputException("Device password cannot be empty");
+        }
+
+        Device device = deviceRepository.findByDeviceId(deviceId.trim())
+                .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + deviceId));
+
+        device.setDevicePassword(newPassword.trim());
+        deviceRepository.save(device);
+
+        logger.info("Admin successfully updated password for device: {}", deviceId);
+    }
+
+    @Transactional
+    public DeviceDto toggleDeviceLicense(String deviceId, boolean enabled) {
+        logger.info("Toggling license for device: {} to {}", deviceId, enabled);
+
+        Device device = deviceRepository.findByDeviceId(deviceId.trim())
+                .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + deviceId));
+
+        device.setLicenseEnabled(enabled);
+        Device saved = deviceRepository.save(device);
+
+        logger.info("License for device {} set to {}", deviceId, enabled);
+
+        return mapToDto(saved);
+    }
+
+    @Transactional
+    public void adminDeleteDevice(String deviceId) {
+        logger.info("Admin deleting device: {}", deviceId);
+
+        Device device = deviceRepository.findByDeviceId(deviceId.trim())
+                .orElseThrow(() -> new DeviceNotFoundException("Device not found with ID: " + deviceId));
+
+        deviceRepository.delete(device);
+
+        logger.info("Admin successfully deleted device: {}", deviceId);
+    }
+
     private DeviceDto mapToDto(Device device) {
         return new DeviceDto(
                 device.getId(),
@@ -374,6 +418,7 @@ public class DeviceService {
                 device.getName(),
                 device.getLocation(),
                 device.getActive(),
+                device.getLicenseEnabled(),
                 device.getLastSeenAt()
         );
     }
