@@ -12,378 +12,241 @@ interface PredictionModalProps {
   deviceId: string;
 }
 
-interface HistoricalDataPoint {
-  timestamp: string;
-  value: number;
-}
-
-interface PredictionData {
-  currentLevel?: number;
-  currentSoc?: number;
-  declineRate: number | null;
-  predictedRuntimeHours: number | null;
-  predictedRuntimeMinutes: number | null;
-  estimatedEmptyTime: string | null;
-  historicalData: HistoricalDataPoint[];
-  hasEnoughData: boolean;
-  message: string;
-}
-
-interface PredictionResponse {
-  fuelPrediction: PredictionData;
-  batteryPrediction: PredictionData;
-}
-
-export default function PredictionModal({ isOpen, onClose, deviceId }: PredictionModalProps) {
-  const [predictionData, setPredictionData] = useState<PredictionResponse | null>(null);
+export default function PredictionModal({
+  isOpen,
+  onClose,
+  deviceId,
+}: PredictionModalProps) {
+  const [predictionData, setPredictionData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      fetchPredictionData();
-    }
+    if (isOpen) fetchPredictionData();
   }, [isOpen, deviceId]);
 
   const fetchPredictionData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-      const response = await fetch(`${apiUrl}/api/predictions/${deviceId}`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch prediction data');
-      }
-
-      const data: PredictionResponse = await response.json();
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+      const response = await fetch(
+        `${apiUrl}/api/predictions/${deviceId}`
+      );
+      if (!response.ok) throw new Error('Failed to fetch');
+      const data = await response.json();
       setPredictionData(data);
-    } catch (err) {
-      console.error('Error fetching prediction data:', err);
+    } catch {
       setError('Failed to load prediction data. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const formatRuntime = (hours: number | null): string => {
-    if (hours === null || hours === undefined) return 'N/A';
-
-    const h = Math.floor(hours);
-    const m = Math.floor((hours - h) * 60);
-
-    if (h > 0) {
-      return `${h}h ${m}m`;
-    }
-    return `${m}m`;
-  };
-
-  const formatDateTime = (dateString: string | null): string => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
-
-  const createChartOptions = (title: string, data: HistoricalDataPoint[], yAxisTitle: string): ApexOptions => {
-    return {
-      chart: {
-        type: 'area',
-        height: 350,
-        zoom: {
-          enabled: false
-        },
-        toolbar: {
-          show: true,
-          tools: {
-            download: true,
-            zoom: false,
-            zoomin: false,
-            zoomout: false,
-            pan: false,
-            reset: false
-          }
-        }
+  const createChartOptions = (color: string): ApexOptions => ({
+    chart: {
+      type: 'area',
+      toolbar: { show: false },
+    },
+    stroke: { curve: 'smooth', width: 2 },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        opacityFrom: 0.45,
+        opacityTo: 0.05,
+        stops: [20, 100],
       },
-      dataLabels: {
-        enabled: false
+    },
+    colors: [color],
+    xaxis: {
+      type: 'datetime',
+      labels: { style: { colors: '#64748b' } },
+    },
+    yaxis: {
+      labels: {
+        style: { colors: '#64748b' },
+        formatter: (v) => `${v.toFixed(0)}%`,
       },
-      stroke: {
-        curve: 'straight',
-        width: 2
-      },
-      title: {
-        text: title,
-        align: 'left',
-        style: {
-          fontSize: '16px',
-          fontWeight: 'bold'
-        }
-      },
-      subtitle: {
-        text: 'Historical Trend',
-        align: 'left'
-      },
-      xaxis: {
-        type: 'datetime',
-        labels: {
-          datetimeFormatter: {
-            hour: 'HH:mm'
-          }
-        }
-      },
-      yaxis: {
-        title: {
-          text: yAxisTitle
-        },
-        labels: {
-          formatter: (value) => value.toFixed(1)
-        }
-      },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shadeIntensity: 1,
-          opacityFrom: 0.7,
-          opacityTo: 0.3,
-          stops: [0, 90, 100]
-        }
-      },
-      tooltip: {
-        x: {
-          format: 'dd MMM HH:mm'
-        }
-      },
-      colors: ['#FF7F00']
-    };
-  };
-
-  const createChartSeries = (data: HistoricalDataPoint[]) => {
-    return [{
-      name: 'Level',
-      data: data.map(point => ({
-        x: new Date(point.timestamp).getTime(),
-        y: point.value
-      }))
-    }];
-  };
+    },
+    grid: { borderColor: '#f1f5f9' },
+    tooltip: {
+      theme: 'light',
+      x: { format: 'dd MMM HH:mm' },
+    },
+  });
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <br /><br />
-      <div className="bg-white rounded-lg shadow-xl border border-[#1E40AF]/20 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-        <br />
-        {/* Header */}
-        <div className="bg-[#1E40AF] px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-          <div className="flex items-center gap-3">
-            <svg className="w-6 h-6 text-[#d9d9d9]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <h2 className="text-2xl font-bold text-[#d9d9d9]">AI Support - Runtime Predictions</h2>
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-6">
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-6xl max-h-[85vh] flex flex-col overflow-hidden">
+        
+        {/* ================= HEADER ================= */}
+        <div className="px-8 py-5 bg-white border-b border-slate-100 sticky top-0 z-20 shadow-sm flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+              <span className="p-2 bg-indigo-50 rounded-lg">
+                ⚡
+              </span>
+              AI Runtime Insights
+            </h2>
+            <p className="text-sm text-slate-500 ml-12">
+              Device:{' '}
+              <span className="font-mono font-medium text-slate-700">
+                {deviceId}
+              </span>
+            </p>
           </div>
+
           <button
             onClick={onClose}
-            className="text-[#d9d9d9] hover:text-white transition-colors"
+            className="p-2 rounded-full hover:bg-slate-100 text-slate-400"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            ✕
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
+        {/* ================= CONTENT ================= */}
+        <div className="flex-1 overflow-y-auto px-8 py-10 bg-slate-50/50">
           {loading && (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E40AF]"></div>
-              <p className="mt-4 text-black/70">Loading prediction data...</p>
+            <div className="py-24 text-center">
+              <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-indigo-600" />
+              <p className="mt-4 text-slate-500 font-medium">
+                Analyzing historical trends…
+              </p>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-              <div className="flex">
-                <svg className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="ml-3 text-red-700">{error}</p>
-              </div>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl">
+              {error}
             </div>
           )}
 
-          {!loading && !error && predictionData && (
-            <div className="space-y-6">
-              {/* Fuel Prediction */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="bg-[#1E40AF] px-4 py-3">
-                  <h3 className="text-lg font-semibold text-[#d9d9d9] flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    Generator Fuel Runtime Prediction
-                  </h3>
-                </div>
+          {predictionData && !loading && !error && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <PredictionSection
+                title="Fuel Level"
+                color="#f59e0b"
+                data={predictionData.fuelPrediction}
+                valueKey="currentLevel"
+                chartOptions={createChartOptions('#f59e0b')}
+              />
 
-                <div className="p-4">
-                  {predictionData.fuelPrediction.hasEnoughData ? (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-[#1E40AF]/10 rounded-lg p-4 border border-[#1E40AF]/30">
-                          <div className="text-sm text-[#1E40AF] font-medium mb-1">Current Fuel Level</div>
-                          <div className="text-3xl font-bold text-[#1E40AF]">
-                            {predictionData.fuelPrediction.currentLevel?.toFixed(1)}%
-                          </div>
-                        </div>
-                        <div className="bg-[#d9d9d9] rounded-lg p-4 border border-[#1E40AF]/30">
-                          <div className="text-sm text-black font-medium mb-1">Decline Rate</div>
-                          <div className="text-3xl font-bold text-[#1E40AF]">
-                            {predictionData.fuelPrediction.declineRate?.toFixed(2)}%/h
-                          </div>
-                        </div>
-                        <div className="bg-white rounded-lg p-4 border border-[#1E40AF]/30">
-                          <div className="text-sm text-black font-medium mb-1">Predicted Runtime</div>
-                          <div className="text-3xl font-bold text-[#1E40AF]">
-                            {formatRuntime(predictionData.fuelPrediction.predictedRuntimeHours)}
-                          </div>
-                        </div>
-                        <div className="bg-[#d9d9d9] rounded-lg p-4 border border-[#1E40AF]/30">
-                          <div className="text-sm text-black font-medium mb-1">Estimated Empty Time</div>
-                          <div className="text-lg font-bold text-[#1E40AF]">
-                            {formatDateTime(predictionData.fuelPrediction.estimatedEmptyTime)}
-                          </div>
-                        </div>
-                      </div>
-
-                      {predictionData.fuelPrediction.historicalData.length > 0 && (
-                        <div className="bg-white rounded-lg border border-[#1E40AF]/20 p-4">
-                          <Chart
-                            options={createChartOptions('Fuel Level Trend', predictionData.fuelPrediction.historicalData, 'Fuel Level (%)')}
-                            series={createChartSeries(predictionData.fuelPrediction.historicalData)}
-                            type="area"
-                            height={350}
-                          />
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                      <div className="flex">
-                        <svg className="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <p className="ml-3 text-yellow-700">{predictionData.fuelPrediction.message}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Battery Prediction */}
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="bg-[#1E40AF]/90 px-4 py-3">
-                  <h3 className="text-lg font-semibold text-[#d9d9d9] flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                    </svg>
-                    Battery Drain Time Prediction
-                  </h3>
-                </div>
-
-                <div className="p-4">
-                  {predictionData.batteryPrediction.hasEnoughData ? (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-[#1E40AF]/10 rounded-lg p-4 border border-[#1E40AF]/30">
-                          <div className="text-sm text-[#1E40AF] font-medium mb-1">Current Battery SOC</div>
-                          <div className="text-3xl font-bold text-[#1E40AF]">
-                            {predictionData.batteryPrediction.currentSoc?.toFixed(1)}%
-                          </div>
-                        </div>
-                        <div className="bg-[#d9d9d9] rounded-lg p-4 border border-[#1E40AF]/30">
-                          <div className="text-sm text-black font-medium mb-1">Decline Rate</div>
-                          <div className="text-3xl font-bold text-[#1E40AF]">
-                            {predictionData.batteryPrediction.declineRate?.toFixed(2)}%/h
-                          </div>
-                        </div>
-                        <div className="bg-white rounded-lg p-4 border border-[#1E40AF]/30">
-                          <div className="text-sm text-black font-medium mb-1">Predicted Runtime</div>
-                          <div className="text-3xl font-bold text-[#1E40AF]">
-                            {formatRuntime(predictionData.batteryPrediction.predictedRuntimeHours)}
-                          </div>
-                        </div>
-                        <div className="bg-[#d9d9d9] rounded-lg p-4 border border-[#1E40AF]/30">
-                          <div className="text-sm text-black font-medium mb-1">Estimated Empty Time</div>
-                          <div className="text-lg font-bold text-[#1E40AF]">
-                            {formatDateTime(predictionData.batteryPrediction.estimatedEmptyTime)}
-                          </div>
-                        </div>
-                      </div>
-
-                      {predictionData.batteryPrediction.historicalData.length > 0 && (
-                        <div className="bg-white rounded-lg border border-[#1E40AF]/20 p-4">
-                          <Chart
-                            options={createChartOptions('Battery SOC Trend', predictionData.batteryPrediction.historicalData, 'Battery SOC (%)')}
-                            series={createChartSeries(predictionData.batteryPrediction.historicalData)}
-                            type="area"
-                            height={350}
-                          />
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                      <div className="flex">
-                        <svg className="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <p className="ml-3 text-yellow-700">{predictionData.batteryPrediction.message}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Information Footer */}
-              <div className="bg-[#1E40AF]/10 border border-[#1E40AF]/30 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 text-[#1E40AF] mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div className="text-sm text-[#1E40AF]">
-                    <p className="font-semibold mb-1">How predictions work:</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>System collects fuel and battery data every 30 minutes</li>
-                      <li>Stores the latest 10 records for analysis</li>
-                      <li>Calculates decline rate based on historical trend</li>
-                      <li>Predicts remaining runtime using: Current Level ÷ Decline Rate</li>
-                      <li>Requires at least 2 data points for accurate predictions</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
+              <PredictionSection
+                title="Battery SOC"
+                color="#10b981"
+                data={predictionData.batteryPrediction}
+                valueKey="currentSoc"
+                chartOptions={createChartOptions('#10b981')}
+              />
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="bg-[#d9d9d9] px-6 py-4 flex justify-end gap-3 sticky bottom-0">
+        {/* ================= FOOTER ================= */}
+        <div className="px-8 py-4 bg-white border-t border-slate-100 shadow-[0_-2px_8px_rgba(0,0,0,0.04)] flex justify-end gap-3">
           <button
             onClick={fetchPredictionData}
-            className="bg-[#1E40AF] hover:bg-[#1E40AF]/90 text-[#d9d9d9] px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+            className="px-5 py-2.5 rounded-xl border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Refresh
+            Refresh Data
           </button>
           <button
             onClick={onClose}
-            className="bg-[#d9d9d9] hover:bg-[#d9d9d9]/80 text-black border border-[#1E40AF]/30 px-4 py-2 rounded-lg font-semibold transition-colors"
+            className="px-8 py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800"
           >
-            Close
+            Done
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================= SUB COMPONENT ================= */
+
+function PredictionSection({
+  title,
+  data,
+  color,
+  valueKey,
+  chartOptions,
+}: any) {
+  const formatRuntime = (hours: number | null) => {
+    if (hours == null) return 'N/A';
+    const h = Math.floor(hours);
+    const m = Math.floor((hours - h) * 60);
+    return h ? `${h}h ${m}m` : `${m}m`;
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+      <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+        <span className="font-bold text-xs uppercase tracking-wider text-slate-600">
+          {title} Prediction
+        </span>
+      </div>
+
+      <div className="p-6 flex-1">
+        {!data?.hasEnoughData ? (
+          <div className="h-full flex items-center justify-center border border-dashed rounded-xl text-slate-500 text-sm">
+            {data?.message}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-slate-50">
+                <p className="text-[10px] uppercase font-bold text-slate-400">
+                  Current
+                </p>
+                <p className="text-2xl font-black text-slate-800">
+                  {data[valueKey]?.toFixed(1)}%
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-indigo-50">
+                <p className="text-[10px] uppercase font-bold text-indigo-400">
+                  Est. Runtime
+                </p>
+                <p className="text-2xl font-black text-indigo-700">
+                  {formatRuntime(data.predictedRuntimeHours)}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs text-slate-400">
+                Estimated depletion at
+              </p>
+              <p className="font-bold text-slate-700 text-sm">
+                {data.estimatedEmptyTime
+                  ? new Date(
+                      data.estimatedEmptyTime
+                    ).toLocaleString()
+                  : 'N/A'}
+              </p>
+            </div>
+
+            <div className="h-64 pt-2">
+              <Chart
+                options={chartOptions}
+                series={[
+                  {
+                    name: title,
+                    data: data.historicalData.map((p: any) => ({
+                      x: new Date(p.timestamp).getTime(),
+                      y: p.value,
+                    })),
+                  },
+                ]}
+                type="area"
+                height="100%"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
