@@ -172,7 +172,7 @@ export default function SettingsPage() {
   if (authLoading || loading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-black/70">Loading...</p>
       </div>
     );
   }
@@ -188,9 +188,9 @@ export default function SettingsPage() {
         <br /><br />
         <div className="max-w-md mx-auto">
           <div className="card">
-            <h1 className="text-3xl font-bold mb-6 text-center">Verify Access</h1>
+            <h1 className="text-3xl font-bold mb-6 text-center text-[#1E40AF]">Verify Access</h1>
 
-            <p className="text-gray-600 mb-6 text-center">
+            <p className="text-black/70 mb-6 text-center">
               For security, please verify your identity with a code sent to your email before accessing device settings.
             </p>
 
@@ -210,7 +210,7 @@ export default function SettingsPage() {
 
             <form onSubmit={handleVerifyCode}>
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="code">
+                <label className="block text-black mb-2" htmlFor="code">
                   Verification Code
                 </label>
                 <input
@@ -238,7 +238,7 @@ export default function SettingsPage() {
             <div className="mt-4 text-center">
               <button
                 onClick={() => router.back()}
-                className="text-primary hover:underline"
+                className="text-[#1E40AF] hover:underline"
               >
                 Cancel
               </button>
@@ -254,8 +254,8 @@ export default function SettingsPage() {
     <div className="container mx-auto px-4 py-8">
       <br /><br />
       <div className="mb-6">
-        <h1 className="text-4xl font-bold mb-2">Device Settings</h1>
-        <p className="text-gray-600">Device ID: {deviceIdString}</p>
+        <h1 className="text-4xl font-bold text-[#1E40AF] mb-2">Device Settings</h1>
+        <p className="text-black/70">Device ID: {deviceIdString}</p>
       </div>
 
       {error && (
@@ -272,7 +272,7 @@ export default function SettingsPage() {
 
       {/* Device Password Section */}
       <div className="card mb-6">
-        <h2 className="text-2xl font-semibold mb-4">Device Password</h2>
+        <h2 className="text-2xl font-semibold text-[#1E40AF] mb-4">Device Password</h2>
 
         {passwordError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -288,7 +288,7 @@ export default function SettingsPage() {
 
         <form onSubmit={handleUpdateDevicePassword}>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2" htmlFor="devicePassword">
+            <label className="block text-black mb-2" htmlFor="devicePassword">
               New Device Password
             </label>
             <input
@@ -300,7 +300,7 @@ export default function SettingsPage() {
               placeholder="Enter new device password"
               required
             />
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-black/60 mt-1">
               This password is used when attaching this device to user accounts.
             </p>
           </div>
@@ -317,7 +317,7 @@ export default function SettingsPage() {
 
       {/* Threshold Configuration Section */}
       <div className="card">
-        <h2 className="text-2xl font-semibold mb-6">Threshold Configuration</h2>
+        <h2 className="text-2xl font-semibold text-[#1E40AF] mb-6">Threshold Configuration</h2>
 
         <div className="space-y-6">
           {thresholds.map((threshold) => (
@@ -371,11 +371,11 @@ function ThresholdEditor({
 
   return (
     <form onSubmit={handleSubmit} className="border-b pb-6 last:border-b-0">
-      <h3 className="text-lg font-semibold mb-3">{parameterName}</h3>
+      <h3 className="text-lg font-semibold text-[#1E40AF] mb-3">{parameterName}</h3>
 
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-gray-700 mb-2">
+          <label className="block text-black mb-2">
             Minimum Value ({threshold.unit})
           </label>
           <input
@@ -389,7 +389,7 @@ function ThresholdEditor({
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">
+          <label className="block text-black mb-2">
             Maximum Value ({threshold.unit})
           </label>
           <input

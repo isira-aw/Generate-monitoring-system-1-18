@@ -74,12 +74,12 @@ export default function AdminsPage() {
       <div>
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Manage Admins</h1>
-            <p className="text-gray-500">Add or remove administrator accounts</p>
+            <h1 className="text-2xl font-bold text-[#1E40AF] mb-1">Manage Admins</h1>
+            <p className="text-black/60">Add or remove administrator accounts</p>
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#1E40AF] text-[#d9d9d9] rounded-lg hover:bg-[#1E40AF]/90 transition-colors font-medium text-sm"
           >
             <Plus className="w-4 h-4" />
             Add Admin
@@ -87,47 +87,47 @@ export default function AdminsPage() {
         </div>
 
         {/* Admin table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-[#1E40AF]/20 overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Created</th>
-                <th className="text-right px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+              <tr className="bg-[#d9d9d9]/50 border-b border-[#1E40AF]/20">
+                <th className="text-left px-6 py-4 text-xs font-semibold text-[#1E40AF] uppercase tracking-wider">Name</th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-[#1E40AF] uppercase tracking-wider">Email</th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-[#1E40AF] uppercase tracking-wider">Created</th>
+                <th className="text-right px-6 py-4 text-xs font-semibold text-[#1E40AF] uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[#1E40AF]/10">
               {loading ? (
                 [...Array(3)].map((_, i) => (
                   <tr key={i}>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-32 animate-pulse" /></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-48 animate-pulse" /></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-24 animate-pulse" /></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-16 ml-auto animate-pulse" /></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-[#d9d9d9] rounded w-32 animate-pulse" /></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-[#d9d9d9] rounded w-48 animate-pulse" /></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-[#d9d9d9] rounded w-24 animate-pulse" /></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-[#d9d9d9] rounded w-16 ml-auto animate-pulse" /></td>
                   </tr>
                 ))
               ) : admins.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-gray-400">
+                  <td colSpan={4} className="px-6 py-12 text-center text-black/50">
                     No admins found
                   </td>
                 </tr>
               ) : (
                 admins.map((admin) => (
-                  <tr key={admin.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={admin.id} className="hover:bg-[#d9d9d9]/30 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-semibold text-blue-600">
+                        <div className="w-8 h-8 bg-[#1E40AF]/10 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-semibold text-[#1E40AF]">
                             {admin.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{admin.name}</span>
+                        <span className="text-sm font-medium text-black">{admin.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{admin.email}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-black/70">{admin.email}</td>
+                    <td className="px-6 py-4 text-sm text-black/60">
                       {new Date(admin.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -151,19 +151,19 @@ export default function AdminsPage() {
         {/* Create Admin Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-[#1E40AF]/20">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <UserPlus className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-[#1E40AF]/10 rounded-lg flex items-center justify-center">
+                    <UserPlus className="w-5 h-5 text-[#1E40AF]" />
                   </div>
-                  <h2 className="text-lg font-bold text-gray-900">Add New Admin</h2>
+                  <h2 className="text-lg font-bold text-[#1E40AF]">Add New Admin</h2>
                 </div>
                 <button
                   onClick={() => { setShowModal(false); setFormError(''); }}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-[#d9d9d9] rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5 text-gray-400" />
+                  <X className="w-5 h-5 text-[#1E40AF]/40" />
                 </button>
               </div>
 
@@ -175,36 +175,36 @@ export default function AdminsPage() {
 
               <form onSubmit={handleCreate} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <label className="block text-sm font-medium text-black mb-1">Name</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900"
+                    className="w-full px-4 py-2.5 border border-[#1E40AF]/30 rounded-lg focus:ring-2 focus:ring-[#1E40AF] focus:border-[#1E40AF] outline-none text-black"
                     placeholder="Admin name"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-black mb-1">Email</label>
                   <input
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900"
+                    className="w-full px-4 py-2.5 border border-[#1E40AF]/30 rounded-lg focus:ring-2 focus:ring-[#1E40AF] focus:border-[#1E40AF] outline-none text-black"
                     placeholder="admin@example.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  <label className="block text-sm font-medium text-black mb-1">Password</label>
                   <input
                     type="password"
                     required
                     minLength={6}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-900"
+                    className="w-full px-4 py-2.5 border border-[#1E40AF]/30 rounded-lg focus:ring-2 focus:ring-[#1E40AF] focus:border-[#1E40AF] outline-none text-black"
                     placeholder="Minimum 6 characters"
                   />
                 </div>
@@ -213,14 +213,14 @@ export default function AdminsPage() {
                   <button
                     type="button"
                     onClick={() => { setShowModal(false); setFormError(''); }}
-                    className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+                    className="flex-1 py-2.5 border border-[#1E40AF]/30 text-black rounded-lg hover:bg-[#d9d9d9] transition-colors font-medium text-sm"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm disabled:opacity-50"
+                    className="flex-1 py-2.5 bg-[#1E40AF] text-[#d9d9d9] rounded-lg hover:bg-[#1E40AF]/90 transition-colors font-medium text-sm disabled:opacity-50"
                   >
                     {submitting ? 'Creating...' : 'Create Admin'}
                   </button>

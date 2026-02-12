@@ -52,7 +52,7 @@ export default function RegisterPage() {
       <br /><br />
       <div className="max-w-md mx-auto">
         <div className="card">
-          <h1 className="text-3xl font-bold mb-6 text-center">Register</h1>
+          <h1 className="text-3xl font-bold mb-6 text-center text-[#1E40AF]">Register</h1>
 
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -62,7 +62,7 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="name">
+              <label className="block text-black mb-2" htmlFor="name">
                 Full Name
               </label>
               <input
@@ -77,7 +77,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="email">
+              <label className="block text-black mb-2" htmlFor="email">
                 Email
               </label>
               <input
@@ -92,7 +92,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="mobileNumber">
+              <label className="block text-black mb-2" htmlFor="mobileNumber">
                 Mobile Number
               </label>
               <input
@@ -110,7 +110,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-gray-700 mb-2" htmlFor="password">
+              <label className="block text-black mb-2" htmlFor="password">
                 Password
               </label>
               <input
@@ -133,9 +133,9 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <p className="mt-4 text-center text-gray-600">
+          <p className="mt-4 text-center text-black/70">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-[#1E40AF] hover:underline">
               Login here
             </Link>
           </p>

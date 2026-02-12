@@ -97,12 +97,12 @@ export default function ProfilePage() {
     <div className="container mx-auto px-4 py-8">
             <br /><br />
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
+        <h1 className="text-3xl font-bold mb-8 text-[#1E40AF]">Account Settings</h1>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Profile Information */}
           <div className="card">
-            <h2 className="text-2xl font-bold mb-6">Profile Information</h2>
+            <h2 className="text-2xl font-bold mb-6 text-[#1E40AF]">Profile Information</h2>
 
             {profileError && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -118,7 +118,7 @@ export default function ProfilePage() {
 
             <form onSubmit={handleProfileUpdate}>
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="name">
+                <label className="block text-black mb-2" htmlFor="name">
                   Full Name
                 </label>
                 <input
@@ -132,7 +132,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="email">
+                <label className="block text-black mb-2" htmlFor="email">
                   Email
                 </label>
                 <input
@@ -146,7 +146,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-gray-700 mb-2" htmlFor="mobileNumber">
+                <label className="block text-black mb-2" htmlFor="mobileNumber">
                   Mobile Number
                 </label>
                 <input
@@ -171,7 +171,7 @@ export default function ProfilePage() {
 
           {/* Change Password */}
           <div className="card">
-            <h2 className="text-2xl font-bold mb-6">Change Password</h2>
+            <h2 className="text-2xl font-bold mb-6 text-[#1E40AF]">Change Password</h2>
 
             {passwordError && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -187,7 +187,7 @@ export default function ProfilePage() {
 
             <form onSubmit={handlePasswordChange}>
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="currentPassword">
+                <label className="block text-black mb-2" htmlFor="currentPassword">
                   Current Password
                 </label>
                 <input
@@ -201,7 +201,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="newPassword">
+                <label className="block text-black mb-2" htmlFor="newPassword">
                   New Password
                 </label>
                 <input
@@ -215,7 +215,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-gray-700 mb-2" htmlFor="confirmPassword">
+                <label className="block text-black mb-2" htmlFor="confirmPassword">
                   Confirm New Password
                 </label>
                 <input

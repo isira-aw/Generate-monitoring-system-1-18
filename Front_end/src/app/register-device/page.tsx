@@ -68,11 +68,11 @@ export default function RegisterDevicePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-[#d9d9d9] py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <h1 className="text-3xl font-bold mb-2 text-center">Register New Device</h1>
-          <p className="text-gray-600 text-center mb-8">
+        <div className="bg-white rounded-lg shadow-xl p-8 border border-[#1E40AF]/20">
+          <h1 className="text-3xl font-bold mb-2 text-center text-[#1E40AF]">Register New Device</h1>
+          <p className="text-black/70 text-center mb-8">
             Register a new generator device that can be assigned to multiple users
           </p>
 
@@ -90,7 +90,7 @@ export default function RegisterDevicePage() {
 
           <form onSubmit={handleSubmit}>
             <div className="mb-6">
-              <label htmlFor="deviceId" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="deviceId" className="block text-sm font-medium text-black mb-2">
                 Device ID <span className="text-red-500">*</span>
               </label>
               <input
@@ -103,13 +103,13 @@ export default function RegisterDevicePage() {
                 disabled={submitting}
                 required
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-black/60 mt-1">
                 Unique identifier for the device (will be used in MQTT topics)
               </p>
             </div>
 
             <div className="mb-6">
-              <label htmlFor="devicePassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="devicePassword" className="block text-sm font-medium text-black mb-2">
                 Device Password <span className="text-red-500">*</span>
               </label>
               <input
@@ -122,13 +122,13 @@ export default function RegisterDevicePage() {
                 disabled={submitting}
                 required
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-black/60 mt-1">
                 Users will need this password to attach the device to their account
               </p>
             </div>
 
             <div className="mb-6">
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="name" className="block text-sm font-medium text-black mb-2">
                 Device Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -141,13 +141,13 @@ export default function RegisterDevicePage() {
                 disabled={submitting}
                 required
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-black/60 mt-1">
                 Friendly name for the device
               </p>
             </div>
 
             <div className="mb-8">
-              <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="location" className="block text-sm font-medium text-black mb-2">
                 Location <span className="text-red-500">*</span>
               </label>
               <input
@@ -160,14 +160,14 @@ export default function RegisterDevicePage() {
                 disabled={submitting}
                 required
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-black/60 mt-1">
                 Physical location of the device
               </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-blue-900 mb-2">Multi-User Support</h3>
-              <p className="text-sm text-blue-800">
+            <div className="bg-[#1E40AF]/10 border border-[#1E40AF]/30 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-[#1E40AF] mb-2">Multi-User Support</h3>
+              <p className="text-sm text-[#1E40AF]">
                 Once registered, this device can be assigned to multiple users. Users can attach the device
                 to their account using the Device ID and Password from the "My Devices" page.
               </p>
@@ -193,9 +193,9 @@ export default function RegisterDevicePage() {
           </form>
         </div>
 
-        <div className="mt-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Registration Instructions</h2>
-          <ol className="list-decimal list-inside space-y-2 text-gray-700">
+        <div className="mt-8 bg-white rounded-lg shadow p-6 border border-[#1E40AF]/20">
+          <h2 className="text-xl font-semibold mb-4 text-[#1E40AF]">Registration Instructions</h2>
+          <ol className="list-decimal list-inside space-y-2 text-black/80">
             <li>Fill in all required fields marked with <span className="text-red-500">*</span></li>
             <li>Choose a unique Device ID that will be used in MQTT topics (format: generator/DEVICE_ID/data)</li>
             <li>Set a secure password that users will need to attach this device</li>

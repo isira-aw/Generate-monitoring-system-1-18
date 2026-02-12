@@ -172,19 +172,19 @@ export default function PredictionModal({ isOpen, onClose, deviceId }: Predictio
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <br /><br />
-      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl border border-[#1E40AF]/20 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <br />
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+        <div className="bg-[#1E40AF] px-6 py-4 flex justify-between items-center sticky top-0 z-10">
           <div className="flex items-center gap-3">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-6 h-6 text-[#d9d9d9]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            <h2 className="text-2xl font-bold text-white">AI Support - Runtime Predictions</h2>
+            <h2 className="text-2xl font-bold text-[#d9d9d9]">AI Support - Runtime Predictions</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-white hover:text-gray-200 transition-colors"
+            className="text-[#d9d9d9] hover:text-white transition-colors"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -196,8 +196,8 @@ export default function PredictionModal({ isOpen, onClose, deviceId }: Predictio
         <div className="p-6">
           {loading && (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-              <p className="mt-4 text-gray-600">Loading prediction data...</p>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E40AF]"></div>
+              <p className="mt-4 text-black/70">Loading prediction data...</p>
             </div>
           )}
 
@@ -216,8 +216,8 @@ export default function PredictionModal({ isOpen, onClose, deviceId }: Predictio
             <div className="space-y-6">
               {/* Fuel Prediction */}
               <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3">
-                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <div className="bg-[#1E40AF] px-4 py-3">
+                  <h3 className="text-lg font-semibold text-[#d9d9d9] flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
@@ -229,34 +229,34 @@ export default function PredictionModal({ isOpen, onClose, deviceId }: Predictio
                   {predictionData.fuelPrediction.hasEnoughData ? (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                          <div className="text-sm text-blue-800 font-medium mb-1">Current Fuel Level</div>
-                          <div className="text-3xl font-bold text-blue-900">
+                        <div className="bg-[#1E40AF]/10 rounded-lg p-4 border border-[#1E40AF]/30">
+                          <div className="text-sm text-[#1E40AF] font-medium mb-1">Current Fuel Level</div>
+                          <div className="text-3xl font-bold text-[#1E40AF]">
                             {predictionData.fuelPrediction.currentLevel?.toFixed(1)}%
                           </div>
                         </div>
-                        <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                          <div className="text-sm text-purple-800 font-medium mb-1">Decline Rate</div>
-                          <div className="text-3xl font-bold text-purple-900">
+                        <div className="bg-[#d9d9d9] rounded-lg p-4 border border-[#1E40AF]/30">
+                          <div className="text-sm text-black font-medium mb-1">Decline Rate</div>
+                          <div className="text-3xl font-bold text-[#1E40AF]">
                             {predictionData.fuelPrediction.declineRate?.toFixed(2)}%/h
                           </div>
                         </div>
-                        <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                          <div className="text-sm text-green-800 font-medium mb-1">Predicted Runtime</div>
-                          <div className="text-3xl font-bold text-green-900">
+                        <div className="bg-white rounded-lg p-4 border border-[#1E40AF]/30">
+                          <div className="text-sm text-black font-medium mb-1">Predicted Runtime</div>
+                          <div className="text-3xl font-bold text-[#1E40AF]">
                             {formatRuntime(predictionData.fuelPrediction.predictedRuntimeHours)}
                           </div>
                         </div>
-                        <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-                          <div className="text-sm text-orange-800 font-medium mb-1">Estimated Empty Time</div>
-                          <div className="text-lg font-bold text-orange-900">
+                        <div className="bg-[#d9d9d9] rounded-lg p-4 border border-[#1E40AF]/30">
+                          <div className="text-sm text-black font-medium mb-1">Estimated Empty Time</div>
+                          <div className="text-lg font-bold text-[#1E40AF]">
                             {formatDateTime(predictionData.fuelPrediction.estimatedEmptyTime)}
                           </div>
                         </div>
                       </div>
 
                       {predictionData.fuelPrediction.historicalData.length > 0 && (
-                        <div className="bg-white rounded-lg border border-gray-200 p-4">
+                        <div className="bg-white rounded-lg border border-[#1E40AF]/20 p-4">
                           <Chart
                             options={createChartOptions('Fuel Level Trend', predictionData.fuelPrediction.historicalData, 'Fuel Level (%)')}
                             series={createChartSeries(predictionData.fuelPrediction.historicalData)}
@@ -281,8 +281,8 @@ export default function PredictionModal({ isOpen, onClose, deviceId }: Predictio
 
               {/* Battery Prediction */}
               <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="bg-gradient-to-r from-green-500 to-green-600 px-4 py-3">
-                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <div className="bg-[#1E40AF]/90 px-4 py-3">
+                  <h3 className="text-lg font-semibold text-[#d9d9d9] flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                     </svg>
@@ -294,34 +294,34 @@ export default function PredictionModal({ isOpen, onClose, deviceId }: Predictio
                   {predictionData.batteryPrediction.hasEnoughData ? (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                          <div className="text-sm text-blue-800 font-medium mb-1">Current Battery SOC</div>
-                          <div className="text-3xl font-bold text-blue-900">
+                        <div className="bg-[#1E40AF]/10 rounded-lg p-4 border border-[#1E40AF]/30">
+                          <div className="text-sm text-[#1E40AF] font-medium mb-1">Current Battery SOC</div>
+                          <div className="text-3xl font-bold text-[#1E40AF]">
                             {predictionData.batteryPrediction.currentSoc?.toFixed(1)}%
                           </div>
                         </div>
-                        <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                          <div className="text-sm text-purple-800 font-medium mb-1">Decline Rate</div>
-                          <div className="text-3xl font-bold text-purple-900">
+                        <div className="bg-[#d9d9d9] rounded-lg p-4 border border-[#1E40AF]/30">
+                          <div className="text-sm text-black font-medium mb-1">Decline Rate</div>
+                          <div className="text-3xl font-bold text-[#1E40AF]">
                             {predictionData.batteryPrediction.declineRate?.toFixed(2)}%/h
                           </div>
                         </div>
-                        <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                          <div className="text-sm text-green-800 font-medium mb-1">Predicted Runtime</div>
-                          <div className="text-3xl font-bold text-green-900">
+                        <div className="bg-white rounded-lg p-4 border border-[#1E40AF]/30">
+                          <div className="text-sm text-black font-medium mb-1">Predicted Runtime</div>
+                          <div className="text-3xl font-bold text-[#1E40AF]">
                             {formatRuntime(predictionData.batteryPrediction.predictedRuntimeHours)}
                           </div>
                         </div>
-                        <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-                          <div className="text-sm text-orange-800 font-medium mb-1">Estimated Empty Time</div>
-                          <div className="text-lg font-bold text-orange-900">
+                        <div className="bg-[#d9d9d9] rounded-lg p-4 border border-[#1E40AF]/30">
+                          <div className="text-sm text-black font-medium mb-1">Estimated Empty Time</div>
+                          <div className="text-lg font-bold text-[#1E40AF]">
                             {formatDateTime(predictionData.batteryPrediction.estimatedEmptyTime)}
                           </div>
                         </div>
                       </div>
 
                       {predictionData.batteryPrediction.historicalData.length > 0 && (
-                        <div className="bg-white rounded-lg border border-gray-200 p-4">
+                        <div className="bg-white rounded-lg border border-[#1E40AF]/20 p-4">
                           <Chart
                             options={createChartOptions('Battery SOC Trend', predictionData.batteryPrediction.historicalData, 'Battery SOC (%)')}
                             series={createChartSeries(predictionData.batteryPrediction.historicalData)}
@@ -345,12 +345,12 @@ export default function PredictionModal({ isOpen, onClose, deviceId }: Predictio
               </div>
 
               {/* Information Footer */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-[#1E40AF]/10 border border-[#1E40AF]/30 rounded-lg p-4">
                 <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-[#1E40AF] mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <div className="text-sm text-blue-800">
+                  <div className="text-sm text-[#1E40AF]">
                     <p className="font-semibold mb-1">How predictions work:</p>
                     <ul className="list-disc list-inside space-y-1">
                       <li>System collects fuel and battery data every 30 minutes</li>
@@ -367,10 +367,10 @@ export default function PredictionModal({ isOpen, onClose, deviceId }: Predictio
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 sticky bottom-0">
+        <div className="bg-[#d9d9d9] px-6 py-4 flex justify-end gap-3 sticky bottom-0">
           <button
             onClick={fetchPredictionData}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+            className="bg-[#1E40AF] hover:bg-[#1E40AF]/90 text-[#d9d9d9] px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -379,7 +379,7 @@ export default function PredictionModal({ isOpen, onClose, deviceId }: Predictio
           </button>
           <button
             onClick={onClose}
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg font-semibold transition-colors"
+            className="bg-[#d9d9d9] hover:bg-[#d9d9d9]/80 text-black border border-[#1E40AF]/30 px-4 py-2 rounded-lg font-semibold transition-colors"
           >
             Close
           </button>
