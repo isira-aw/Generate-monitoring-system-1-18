@@ -210,7 +210,7 @@ export default function DevicesPage() {
   if (authLoading || loading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-black/70">Loading...</p>
       </div>
     );
   }
@@ -223,7 +223,7 @@ export default function DevicesPage() {
     <div className="container mx-auto px-4 py-8">
       <br /><br />
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">My Devices</h1>
+        <h1 className="text-4xl font-bold text-[#1E40AF]">My Devices</h1>
         <button
           onClick={() => setShowAddModal(true)}
           className="btn btn-primary"
@@ -246,10 +246,10 @@ export default function DevicesPage() {
 
       {devices.length === 0 ? (
         <div className="card text-center">
-          <p className="text-gray-600 mb-4">
+          <p className="text-black/70 mb-4">
             No devices attached to your account yet.
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-black/60">
             Click the "Add Device" button above to attach a device using its ID and password.
           </p>
         </div>
@@ -258,18 +258,18 @@ export default function DevicesPage() {
           {devices.map((device) => (
             <div
               key={device.id}
-              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 p-5 flex flex-col justify-between"
+              className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 p-5 flex flex-col justify-between border border-[#1E40AF]/20"
             >
               {/* Header */}
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800">{device.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1">ID: {device.deviceId}</p>
+                  <h3 className="text-xl font-semibold text-[#1E40AF]">{device.name}</h3>
+                  <p className="text-sm text-black/60 mt-1">ID: {device.deviceId}</p>
                 </div>
                 <span
                   className={`px-3 py-1 text-xs font-medium rounded-full ${device.active
                       ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
+                      : 'bg-[#d9d9d9] text-black'
                     }`}
                 >
                   {device.active ? 'Active' : 'Inactive'}
@@ -278,9 +278,9 @@ export default function DevicesPage() {
 
               {/* Location & Last Seen */}
               <div className="mb-4">
-                <p className="text-gray-600">{device.location || 'Unknown location'}</p>
+                <p className="text-black/70">{device.location || 'Unknown location'}</p>
                 {device.lastSeenAt && (
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-black/50 mt-1">
                     Last seen: {new Date(device.lastSeenAt).toLocaleString()}
                   </p>
                 )}
@@ -300,7 +300,7 @@ export default function DevicesPage() {
                 <div className="flex gap-2">
                   <Link
                     href={`/device/${device.deviceId}/settings`}
-                    className="flex-1 text-center py-2 px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+                    className="flex-1 text-center py-2 px-4 bg-[#d9d9d9] text-black border border-[#1E40AF]/20 rounded-lg hover:bg-[#d9d9d9]/80 transition-colors duration-200"
                   >
                     Thresholds
                   </Link>
@@ -327,12 +327,12 @@ export default function DevicesPage() {
       {/* Add Device Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 border border-[#1E40AF]/20">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Add Device</h2>
+              <h2 className="text-2xl font-bold text-[#1E40AF]">Add Device</h2>
               <button
                 onClick={handleCloseModal}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="text-[#1E40AF]/50 hover:text-[#1E40AF] text-2xl"
                 disabled={submitting}
               >
                 &times;
@@ -353,7 +353,7 @@ export default function DevicesPage() {
               )}
 
               <div className="mb-4">
-                <label htmlFor="deviceId" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="deviceId" className="block text-sm font-medium text-black mb-2">
                   Device ID
                 </label>
                 <input
@@ -369,7 +369,7 @@ export default function DevicesPage() {
               </div>
 
               <div className="mb-6">
-                <label htmlFor="devicePassword" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="devicePassword" className="block text-sm font-medium text-black mb-2">
                   Device Password
                 </label>
                 <input
@@ -409,12 +409,12 @@ export default function DevicesPage() {
       {/* Edit Device Modal */}
       {showEditModal && editingDevice && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 border border-[#1E40AF]/20">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Edit Device</h2>
+              <h2 className="text-2xl font-bold text-[#1E40AF]">Edit Device</h2>
               <button
                 onClick={handleCloseEditModal}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="text-[#1E40AF]/50 hover:text-[#1E40AF] text-2xl"
                 disabled={submitting}
               >
                 &times;
@@ -429,19 +429,19 @@ export default function DevicesPage() {
               )}
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   Device ID (Read-only)
                 </label>
                 <input
                   type="text"
-                  className="input w-full bg-gray-100"
+                  className="input w-full bg-[#d9d9d9] text-black"
                   value={editingDevice.deviceId}
                   disabled
                 />
               </div>
 
               <div className="mb-4">
-                <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="edit-name" className="block text-sm font-medium text-black mb-2">
                   Device Name
                 </label>
                 <input
@@ -457,7 +457,7 @@ export default function DevicesPage() {
               </div>
 
               <div className="mb-6">
-                <label htmlFor="edit-location" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="edit-location" className="block text-sm font-medium text-black mb-2">
                   Location
                 </label>
                 <input

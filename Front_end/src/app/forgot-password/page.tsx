@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-md mx-auto">
         <div className="card">
-          <h1 className="text-3xl font-bold mb-6 text-center">
+          <h1 className="text-3xl font-bold mb-6 text-center text-[#1E40AF]">
             {step === 'email' ? 'Forgot Password' : 'Reset Password'}
           </h1>
 
@@ -86,12 +86,12 @@ export default function ForgotPasswordPage() {
 
           {step === 'email' ? (
             <form onSubmit={handleSendCode}>
-              <p className="text-gray-600 mb-4">
+              <p className="text-black/70 mb-4">
                 Enter your email address and we'll send you a verification code to reset your password.
               </p>
 
               <div className="mb-6">
-                <label className="block text-gray-700 mb-2" htmlFor="email">
+                <label className="block text-black mb-2" htmlFor="email">
                   Email
                 </label>
                 <input
@@ -114,12 +114,12 @@ export default function ForgotPasswordPage() {
             </form>
           ) : (
             <form onSubmit={handleResetPassword}>
-              <p className="text-gray-600 mb-4">
+              <p className="text-black/70 mb-4">
                 Enter the 4-digit verification code sent to your email and your new password.
               </p>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="code">
+                <label className="block text-black mb-2" htmlFor="code">
                   Verification Code
                 </label>
                 <input
@@ -136,7 +136,7 @@ export default function ForgotPasswordPage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="newPassword">
+                <label className="block text-black mb-2" htmlFor="newPassword">
                   New Password
                 </label>
                 <input
@@ -150,7 +150,7 @@ export default function ForgotPasswordPage() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-gray-700 mb-2" htmlFor="confirmPassword">
+                <label className="block text-black mb-2" htmlFor="confirmPassword">
                   Confirm Password
                 </label>
                 <input
@@ -181,9 +181,9 @@ export default function ForgotPasswordPage() {
             </form>
           )}
 
-          <p className="mt-4 text-center text-gray-600">
+          <p className="mt-4 text-center text-black/70">
             Remember your password?{' '}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-[#1E40AF] hover:underline">
               Login here
             </Link>
           </p>

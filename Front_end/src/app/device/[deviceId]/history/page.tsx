@@ -333,7 +333,7 @@ export default function HistoryPage() {
     if (data.length === 0) return data;
 
     const result: { timestamp: string; rpm: number }[] = [];
-    const sortedData = [...data].sort((a, b) => 
+    const sortedData = [...data].sort((a, b) =>
       new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
 
@@ -480,23 +480,23 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-[#d9d9d9] p-4">
       <br /><br />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md border border-[#1E40AF]/20 p-6 mb-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">Documents and History</h1>
+              <h1 className="text-3xl font-bold text-[#1E40AF]">Documents and History</h1>
               {device && (
-                <p className="text-gray-600 mt-2">
+                <p className="text-black/70 mt-2">
                   {device.name} ({device.deviceId})
                 </p>
               )}
             </div>
             <button
               onClick={() => router.push(`/device/${deviceId}/dashboard`)}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition"
+              className="bg-[#d9d9d9] hover:bg-[#d9d9d9]/80 text-black border border-[#1E40AF]/30 px-4 py-2 rounded-md transition"
             >
               Back to Dashboard
             </button>
@@ -504,28 +504,28 @@ export default function HistoryPage() {
         </div>
 
         {/* RPM Area Chart Section - ApexCharts with zero value handling */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        <div className="bg-white rounded-lg shadow-md border border-[#1E40AF]/20 p-6 mb-6">
+          <h2 className="text-xl font-semibold text-[#1E40AF] mb-4">
             RPM Area Chart
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Select Date
               </label>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-[#1E40AF]/30 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
               />
             </div>
             <div className="flex items-end">
               <button
                 onClick={handleLoadChartData}
                 disabled={chartLoading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition flex items-center"
+                className="bg-[#1E40AF] hover:bg-[#1E40AF]/90 disabled:bg-gray-400 text-[#d9d9d9] px-6 py-2 rounded-md transition flex items-center"
               >
                 {chartLoading ? (
                   <>
@@ -544,10 +544,10 @@ export default function HistoryPage() {
 
           {chartData.length > 0 && (
             <div className="mt-6">
-              {/* <div className="bg-blue-50 border border-blue-200 p-3 rounded-md mb-4">
-                <p className="text-sm text-blue-800">
-                  <strong>📊 Data Points:</strong> {chartData.length} minutes | 
-                  <strong> Zero Values:</strong> {chartData.filter(d => d.rpm === 0).length} minutes | 
+              {/* <div className="bg-[#1E40AF]/10 border border-[#1E40AF]/30 p-3 rounded-md mb-4">
+                <p className="text-sm text-[#1E40AF]">
+                  <strong>📊 Data Points:</strong> {chartData.length} minutes |
+                  <strong> Zero Values:</strong> {chartData.filter(d => d.rpm === 0).length} minutes |
                   <strong> Active:</strong> {chartData.filter(d => d.rpm > 0).length} minutes
                 </p>
               </div> */}
@@ -557,18 +557,18 @@ export default function HistoryPage() {
               <div id="chart-bar"></div>
 
               {/* Data Table */}
-              <div className="mt-6 bg-white border border-gray-200 rounded-lg overflow-hidden">
+              <div className="mt-6 bg-white border border-[#1E40AF]/20 rounded-lg overflow-hidden">
                 <div className="max-h-96 overflow-y-auto">
                   {/* <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50 sticky top-0">
+                    <thead className="bg-[#d9d9d9]/50 sticky top-0">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#1E40AF] uppercase tracking-wider">
                           Time
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#1E40AF] uppercase tracking-wider">
                           Average RPM
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#1E40AF] uppercase tracking-wider">
                           Status
                         </th>
                       </tr>
@@ -577,19 +577,19 @@ export default function HistoryPage() {
                       {chartData.map((point, index) => {
                         const time = new Date(point.timestamp);
                         const isZero = point.rpm === 0;
-                        
+
                         // Format time consistently
                         const hours = time.getHours().toString().padStart(2, '0');
                         const minutes = time.getMinutes().toString().padStart(2, '0');
                         const seconds = time.getSeconds().toString().padStart(2, '0');
                         const formattedTime = `${hours}:${minutes}:${seconds}`;
-                        
+
                         return (
-                          <tr key={index} className={`hover:bg-gray-50 ${isZero ? 'bg-red-50' : ''}`}>
-                            <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
+                          <tr key={index} className={`hover:bg-[#d9d9d9]/30 ${isZero ? 'bg-red-50' : ''}`}>
+                            <td className="px-6 py-2 whitespace-nowrap text-sm text-black">
                               {formattedTime}
                             </td>
-                            <td className={`px-6 py-2 whitespace-nowrap text-sm font-medium ${isZero ? 'text-red-600' : 'text-gray-900'}`}>
+                            <td className={`px-6 py-2 whitespace-nowrap text-sm font-medium ${isZero ? 'text-red-600' : 'text-black'}`}>
                               {point.rpm.toFixed(2)}
                             </td>
                             <td className="px-6 py-2 whitespace-nowrap text-sm">
@@ -614,56 +614,56 @@ export default function HistoryPage() {
           )}
 
           {chartData.length === 0 && !chartLoading && (
-            <div className="mt-6 p-4 bg-gray-100 rounded-md text-center text-gray-600">
+            <div className="mt-6 p-4 bg-[#d9d9d9]/50 rounded-md text-center text-black/70">
               Select a date and click "Load Chart Data" to view the RPM chart
             </div>
           )}
         </div>
 
         {/* Date Selection */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Select Time Period</h2>
+        <div className="bg-white rounded-lg shadow-md border border-[#1E40AF]/20 p-6 mb-6">
+          <h2 className="text-xl font-semibold text-[#1E40AF] mb-4">Select Time Period</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Start Date & Time
               </label>
               <input
                 type="datetime-local"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-[#1E40AF]/30 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 End Date & Time
               </label>
               <input
                 type="datetime-local"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-[#1E40AF]/30 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
               />
             </div>
           </div>
         </div>
 
         {/* Parameter Selection */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md border border-[#1E40AF]/20 p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">Select Parameters</h2>
+            <h2 className="text-xl font-semibold text-[#1E40AF]">Select Parameters</h2>
             <div className="space-x-2">
               <button
                 onClick={handleSelectAll}
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="text-sm text-[#1E40AF] hover:text-[#1E40AF]/80"
               >
                 Select All
               </button>
-              <span className="text-gray-400">|</span>
+              <span className="text-black/50">|</span>
               <button
                 onClick={handleDeselectAll}
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="text-sm text-[#1E40AF] hover:text-[#1E40AF]/80"
               >
                 Deselect All
               </button>
@@ -674,31 +674,31 @@ export default function HistoryPage() {
             {Object.entries(availableParameters).map(([key, displayName]) => (
               <label
                 key={key}
-                className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
+                className="flex items-center space-x-2 cursor-pointer hover:bg-[#d9d9d9]/30 p-2 rounded"
               >
                 <input
                   type="checkbox"
                   checked={selectedParameters.includes(key)}
                   onChange={() => handleParameterToggle(key)}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-[#1E40AF] rounded focus:ring-[#1E40AF]"
                 />
-                <span className="text-sm text-gray-700">{displayName}</span>
+                <span className="text-sm text-black">{displayName}</span>
               </label>
             ))}
           </div>
 
-          <div className="mt-4 text-sm text-gray-600">
+          <div className="mt-4 text-sm text-black/70">
             Selected: {selectedParameters.length} parameter(s)
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md border border-[#1E40AF]/20 p-6 mb-6">
           <div className="flex flex-wrap gap-4">
             <button
               onClick={handleQuery}
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition flex items-center"
+              className="bg-[#1E40AF] hover:bg-[#1E40AF]/90 disabled:bg-gray-400 text-[#d9d9d9] px-6 py-2 rounded-md transition flex items-center"
             >
               {loading ? (
                 <>
@@ -716,7 +716,7 @@ export default function HistoryPage() {
             <button
               onClick={handleGeneratePdf}
               disabled={loading}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md transition"
+              className="bg-[#1E40AF]/80 hover:bg-[#1E40AF] disabled:bg-gray-400 text-[#d9d9d9] px-6 py-2 rounded-md transition"
             >
               Generate PDF Report
             </button>
@@ -731,21 +731,21 @@ export default function HistoryPage() {
 
         {/* Data Table */}
         {historyData.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          <div className="bg-white rounded-lg shadow-md border border-[#1E40AF]/20 p-6">
+            <h2 className="text-xl font-semibold text-[#1E40AF] mb-4">
               Historical Data ({historyData.length} records)
             </h2>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-[#d9d9d9]/50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-[#1E40AF] uppercase tracking-wider">
                       Timestamp
                     </th>
                     {selectedParameters.map((param) => (
                       <th
                         key={param}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        className="px-4 py-3 text-left text-xs font-medium text-[#1E40AF] uppercase tracking-wider"
                       >
                         {availableParameters[param] || param}
                       </th>
@@ -754,14 +754,14 @@ export default function HistoryPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {historyData.map((dataPoint, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                    <tr key={index} className="hover:bg-[#d9d9d9]/30">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-black">
                         {formatTimestamp(dataPoint.timestamp)}
                       </td>
                       {selectedParameters.map((param) => (
                         <td
                           key={param}
-                          className="px-4 py-3 whitespace-nowrap text-sm text-gray-700"
+                          className="px-4 py-3 whitespace-nowrap text-sm text-black/80"
                         >
                           {formatValue(dataPoint.parameters[param])}
                         </td>

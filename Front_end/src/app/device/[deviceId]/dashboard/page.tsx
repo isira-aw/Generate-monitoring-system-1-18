@@ -94,7 +94,7 @@ export default function DashboardPage() {
   const drawSpeedometer = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -157,9 +157,9 @@ export default function DashboardPage() {
   // License check - show blocked page if license is disabled
   if (device && device.licenseEnabled === false) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#d9d9d9] flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+          <div className="bg-white rounded-2xl shadow-lg border border-[#1E40AF]/20 p-8">
             {/* Lock icon */}
             <div className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
               <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -168,22 +168,22 @@ export default function DashboardPage() {
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">License Disabled</h1>
+            <h1 className="text-2xl font-bold text-[#1E40AF] mb-2">License Disabled</h1>
 
             {/* Device info */}
-            <p className="text-sm text-gray-500 mb-4">
-              Device: <span className="font-medium text-gray-700">{device.name}</span> ({deviceId})
+            <p className="text-sm text-black/60 mb-4">
+              Device: <span className="font-medium text-black">{device.name}</span> ({deviceId})
             </p>
 
             {/* Message */}
-            <p className="text-gray-600 mb-6 leading-relaxed">
+            <p className="text-black/70 mb-6 leading-relaxed">
               You do not have an active license to access this device.
               Please contact your administrator to enable the license for this device.
             </p>
 
             {/* Divider */}
-            <div className="border-t border-gray-200 pt-5">
-              <p className="text-xs text-gray-400">
+            <div className="border-t border-[#1E40AF]/20 pt-5">
+              <p className="text-xs text-black/50">
                 If you believe this is an error, please reach out to your system administrator.
               </p>
             </div>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
     })),
   ];
 
-  const totalGeneratorP = telemetry ? 
+  const totalGeneratorP = telemetry ?
     (telemetry.Generator_P_L1 || 0) + (telemetry.Generator_P_L2 || 0) + (telemetry.Generator_P_L3 || 0) : 0;
 
   // Mini sparkline
@@ -236,31 +236,31 @@ export default function DashboardPage() {
     );
   };
 
-  const MetricCard = ({ label, value, unit, color, data }: { 
-    label: string; 
-    value: number; 
-    unit: string; 
+  const MetricCard = ({ label, value, unit, color, data }: {
+    label: string;
+    value: number;
+    unit: string;
     color: string;
     data?: number[];
   }) => (
-    <div className="bg-white rounded-lg shadow-sm p-2.5 border border-gray-200">
-      <div className="text-xs text-gray-600 mb-1 font-medium">{label}</div>
+    <div className="bg-white rounded-lg shadow-sm p-2.5 border border-[#1E40AF]/20">
+      <div className="text-xs text-black/70 mb-1 font-medium">{label}</div>
       <div className="flex items-baseline justify-between mb-1.5">
         <span className="text-xl font-bold leading-none" style={{ color }}>{value.toFixed(2)}</span>
-        <span className="text-xs text-gray-500 ml-2">{unit}</span>
+        <span className="text-xs text-black/60 ml-2">{unit}</span>
       </div>
       {data && <Sparkline data={data} color={color} />}
     </div>
   );
 
   const DataRow = ({ label, value, unit, alert }: { label: string; value: any; unit: string; alert?: boolean }) => (
-    <div className={`flex justify-between items-center py-1.5 px-2 text-xs border-b border-gray-100 last:border-0 ${alert ? 'bg-red-50 border-red-200' : 'hover:bg-gray-50'}`}>
-      <span className={`font-medium ${alert ? 'text-red-900' : 'text-gray-700'}`}>{label}</span>
+    <div className={`flex justify-between items-center py-1.5 px-2 text-xs border-b border-[#1E40AF]/10 last:border-0 ${alert ? 'bg-red-50 border-red-200' : 'hover:bg-[#d9d9d9]/50'}`}>
+      <span className={`font-medium ${alert ? 'text-red-900' : 'text-black/80'}`}>{label}</span>
       <div className="flex items-baseline gap-1">
-        <span className={`font-semibold ${alert ? 'text-red-900' : 'text-gray-900'}`}>
+        <span className={`font-semibold ${alert ? 'text-red-900' : 'text-black'}`}>
           {value !== null && value !== undefined ? (typeof value === 'number' ? value.toFixed(2) : value) : 'N/A'}
         </span>
-        {unit && <span className="text-gray-500 text-[11px]">{unit}</span>}
+        {unit && <span className="text-black/60 text-[11px]">{unit}</span>}
       </div>
     </div>
   );
@@ -280,14 +280,14 @@ export default function DashboardPage() {
   const CollapsibleSection = ({ title, children, id }: { title: string; children: React.ReactNode; id: string }) => {
     const isExpanded = expandedSection === id;
     return (
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 lg:hidden">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-[#1E40AF]/20 lg:hidden">
         <button
           onClick={() => toggleSection(id)}
-          className="w-full bg-gradient-to-r from-gray-800 to-gray-700 px-3 py-2.5 flex justify-between items-center hover:from-gray-700 hover:to-gray-600 transition-colors"
+          className="w-full bg-[#1E40AF] px-3 py-2.5 flex justify-between items-center hover:bg-[#1E40AF]/90 transition-colors"
         >
-          <h3 className="text-sm font-semibold text-white">{title}</h3>
+          <h3 className="text-sm font-semibold text-[#d9d9d9]">{title}</h3>
           <svg
-            className={`h-4 w-4 text-white transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            className={`h-4 w-4 text-[#d9d9d9] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -301,20 +301,20 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen lg:h-screen bg-gradient-to-br from-gray-50 to-gray-100 lg:overflow-hidden">
+    <div className="min-h-screen lg:h-screen bg-[#d9d9d9] lg:overflow-hidden">
       <br /><br />
       <div className="h-full flex flex-col p-3 lg:p-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 lg:mb-4">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">{device?.name || 'Loading...'}</h1>
-            <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded border border-gray-200">ID: {deviceId}</span>
+            <h1 className="text-xl lg:text-2xl font-bold text-[#1E40AF]">{device?.name || 'Loading...'}</h1>
+            <span className="text-xs text-black bg-white px-2 py-1 rounded border border-[#1E40AF]/20">ID: {deviceId}</span>
             <span className={`px-2.5 py-1 text-xs font-semibold rounded-full shadow-sm ${connected ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
               {connected ? '● Live' : '○ Offline'}
             </span>
             <button
               onClick={() => router.push(`/device/${deviceId}/history`)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5"
+              className="bg-[#1E40AF] hover:bg-[#1E40AF]/90 text-[#d9d9d9] px-3 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -323,7 +323,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => setIsPredictionModalOpen(true)}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-3 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5"
+              className="bg-[#1E40AF] hover:bg-[#1E40AF]/90 text-[#d9d9d9] px-3 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -332,7 +332,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => router.push(`/device/${deviceId}/settings`)}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5"
+              className="bg-[#d9d9d9] hover:bg-[#d9d9d9]/80 text-black border border-[#1E40AF]/30 px-3 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -342,9 +342,9 @@ export default function DashboardPage() {
             </button>
           </div>
           {telemetry && (
-            <div className="text-left sm:text-right bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
-              <div className="text-xs text-gray-600">Last Update</div>
-              <div className="text-sm font-semibold text-gray-900">{new Date(telemetry.timestamp).toLocaleTimeString()}</div>
+            <div className="text-left sm:text-right bg-white px-3 py-1.5 rounded-lg border border-[#1E40AF]/20 shadow-sm">
+              <div className="text-xs text-black/70">Last Update</div>
+              <div className="text-sm font-semibold text-black">{new Date(telemetry.timestamp).toLocaleTimeString()}</div>
             </div>
           )}
         </div>
@@ -366,44 +366,44 @@ export default function DashboardPage() {
 
         {/* Mobile: Primary Metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2  lg:hidden">
-          <MetricCard 
-            label="Power" 
-            value={totalGeneratorP} 
-            unit="kW" 
+          <MetricCard
+            label="Power"
+            value={totalGeneratorP}
+            unit="kW"
             color="#3b82f6"
             data={history.map(h => h.power)}
           />
-          <MetricCard 
-            label="Frequency" 
-            value={telemetry?.Generator_Frequency || 0} 
-            unit="Hz" 
+          <MetricCard
+            label="Frequency"
+            value={telemetry?.Generator_Frequency || 0}
+            unit="Hz"
             color="#8b5cf6"
             data={history.map(h => h.frequency)}
           />
-          <MetricCard 
-            label="Voltage" 
-            value={telemetry ? ((telemetry.Generator_Voltage_L1_N || 0) + (telemetry.Generator_Voltage_L2_N || 0) + (telemetry.Generator_Voltage_L3_N || 0)) / 3 : 0} 
-            unit="V" 
+          <MetricCard
+            label="Voltage"
+            value={telemetry ? ((telemetry.Generator_Voltage_L1_N || 0) + (telemetry.Generator_Voltage_L2_N || 0) + (telemetry.Generator_Voltage_L3_N || 0)) / 3 : 0}
+            unit="V"
             color="#10b981"
             data={history.map(h => h.voltage)}
           />
-          <MetricCard 
-            label="Power Factor" 
-            value={telemetry?.Generator_Power_Factor || 0} 
-            unit="" 
+          <MetricCard
+            label="Power Factor"
+            value={telemetry?.Generator_Power_Factor || 0}
+            unit=""
             color="#f59e0b"
           />
         </div>
 
         {/* Mobile: RPM Gauge */}
-        <div className="bg-white rounded-lg shadow-sm p-3 mb-3 border border-gray-200 lg:hidden">
-          <h3 className="text-sm font-semibold mb-2 text-gray-900 text-center">Engine Speed</h3>
+        <div className="bg-white rounded-lg shadow-sm p-3 mb-3 border border-[#1E40AF]/20 lg:hidden">
+          <h3 className="text-sm font-semibold mb-2 text-black text-center">Engine Speed</h3>
           <canvas ref={canvasRef} width={180} height={180} className="mx-auto" />
         </div>
 
         {/* Mobile: Collapsible Sections */}
         <div className="space-y-2 lg:hidden pb-4">
-          
+
           <CollapsibleSection title="Critical Status" id="status">
             <div className="space-y-0">
               <DataRow label="RPM" value={telemetry?.RPM} unit="rpm" />
@@ -418,19 +418,19 @@ export default function DashboardPage() {
           <CollapsibleSection title="Generator Power" id="generator">
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <div className="text-xs font-semibold text-gray-600 mb-1.5 pb-1 border-b">Active Power (kW)</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mb-1.5 pb-1 border-b">Active Power (kW)</div>
                 <DataRow label="L1" value={telemetry?.Generator_P_L1} unit="" />
                 <DataRow label="L2" value={telemetry?.Generator_P_L2} unit="" />
                 <DataRow label="L3" value={telemetry?.Generator_P_L3} unit="" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-gray-600 mb-1.5 pb-1 border-b">Reactive (kVAr)</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mb-1.5 pb-1 border-b">Reactive (kVAr)</div>
                 <DataRow label="L1" value={telemetry?.Generator_Q_L1} unit="" />
                 <DataRow label="L2" value={telemetry?.Generator_Q_L2} unit="" />
                 <DataRow label="L3" value={telemetry?.Generator_Q_L3} unit="" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-gray-600 mb-1.5 pb-1 border-b">Apparent (kVA)</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mb-1.5 pb-1 border-b">Apparent (kVA)</div>
                 <DataRow label="L1" value={telemetry?.Generator_S_L1} unit="" />
                 <DataRow label="L2" value={telemetry?.Generator_S_L2} unit="" />
                 <DataRow label="L3" value={telemetry?.Generator_S_L3} unit="" />
@@ -441,17 +441,17 @@ export default function DashboardPage() {
           <CollapsibleSection title="Voltage & Current" id="voltage">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <div className="text-xs font-semibold text-gray-600 mb-1.5 pb-1 border-b">Phase-Neutral (V)</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mb-1.5 pb-1 border-b">Phase-Neutral (V)</div>
                 <DataRow label="L1-N" value={telemetry?.Generator_Voltage_L1_N} unit="" />
                 <DataRow label="L2-N" value={telemetry?.Generator_Voltage_L2_N} unit="" />
                 <DataRow label="L3-N" value={telemetry?.Generator_Voltage_L3_N} unit="" />
-                <div className="text-xs font-semibold text-gray-600 mt-2 mb-1.5 pb-1 border-b">Phase-Phase (V)</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mt-2 mb-1.5 pb-1 border-b">Phase-Phase (V)</div>
                 <DataRow label="L1-L2" value={telemetry?.Generator_Voltage_L1_L2} unit="" />
                 <DataRow label="L2-L3" value={telemetry?.Generator_Voltage_L2_L3} unit="" />
                 <DataRow label="L3-L1" value={telemetry?.Generator_Voltage_L3_L1} unit="" />
               </div>
               <div>
-                <div className="text-xs font-semibold text-gray-600 mb-1.5 pb-1 border-b">Current (A)</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mb-1.5 pb-1 border-b">Current (A)</div>
                 <DataRow label="L1" value={telemetry?.Generator_Current_L1} unit="" />
                 <DataRow label="L2" value={telemetry?.Generator_Current_L2} unit="" />
                 <DataRow label="L3" value={telemetry?.Generator_Current_L3} unit="" />
@@ -463,15 +463,15 @@ export default function DashboardPage() {
           <CollapsibleSection title="Mains/Bus" id="mains">
             <div className="space-y-0">
               <DataRow label="Frequency" value={telemetry?.Mains_Bus_Frequency} unit="Hz" />
-              <div className="text-xs font-semibold text-gray-600 mt-2 mb-1.5 px-2 pb-1 border-b">Voltage L-N (V)</div>
+              <div className="text-xs font-semibold text-[#1E40AF] mt-2 mb-1.5 px-2 pb-1 border-b">Voltage L-N (V)</div>
               <DataRow label="L1" value={telemetry?.Mains_Bus_Voltage_L1_N} unit="" />
               <DataRow label="L2" value={telemetry?.Mains_Bus_Voltage_L2_N} unit="" />
               <DataRow label="L3" value={telemetry?.Mains_Bus_Voltage_L3_N} unit="" />
-              <div className="text-xs font-semibold text-gray-600 mt-2 mb-1.5 px-2 pb-1 border-b">Voltage L-L (V)</div>
+              <div className="text-xs font-semibold text-[#1E40AF] mt-2 mb-1.5 px-2 pb-1 border-b">Voltage L-L (V)</div>
               <DataRow label="L1-L2" value={telemetry?.Mains_Bus_Voltage_L1_L2} unit="" />
               <DataRow label="L2-L3" value={telemetry?.Mains_Bus_Voltage_L2_L3} unit="" />
               <DataRow label="L3-L1" value={telemetry?.Mains_Bus_Voltage_L3_L1} unit="" />
-              <div className="text-xs font-semibold text-gray-600 mt-2 mb-1.5 px-2 pb-1 border-b">Import</div>
+              <div className="text-xs font-semibold text-[#1E40AF] mt-2 mb-1.5 px-2 pb-1 border-b">Import</div>
               <DataRow label="Current L1" value={telemetry?.Mains_L1_Current} unit="A" />
               <DataRow label="Active Power" value={telemetry?.Mains_Import_P} unit="kW" />
               <DataRow label="Reactive Power" value={telemetry?.Mains_Import_Q} unit="kVAr" />
@@ -481,11 +481,11 @@ export default function DashboardPage() {
 
           <CollapsibleSection title="Load & Monitoring" id="load">
             <div className="space-y-0">
-              <div className="text-xs font-semibold text-gray-600 mb-1.5 px-2 pb-1 border-b">Load</div>
+              <div className="text-xs font-semibold text-[#1E40AF] mb-1.5 px-2 pb-1 border-b">Load</div>
               <DataRow label="Active Power" value={telemetry?.Load_P} unit="kW" />
               <DataRow label="Reactive Power" value={telemetry?.Load_Q} unit="kVAr" />
               <DataRow label="Power Factor" value={telemetry?.Load_PF} unit="" />
-              <div className="text-xs font-semibold text-gray-600 mt-2 mb-1.5 px-2 pb-1 border-b">Protection</div>
+              <div className="text-xs font-semibold text-[#1E40AF] mt-2 mb-1.5 px-2 pb-1 border-b">Protection</div>
               <DataRow label="Max Vector Shift" value={telemetry?.Max_Vector_Shift} unit="°" />
               <DataRow label="ROCOF" value={telemetry?.ROCOF} unit="Hz/s" />
               <DataRow label="Max ROCOF" value={telemetry?.Max_ROCOF} unit="Hz/s" />
@@ -497,16 +497,16 @@ export default function DashboardPage() {
             <div className="space-y-0">
               {thresholds.length > 0 ? (
                 thresholds.map((threshold) => (
-                  <div key={threshold.id} className="py-2 px-2 text-xs border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                    <div className="font-medium text-gray-700 mb-1">{formatParameterName(threshold.parameter)}</div>
+                  <div key={threshold.id} className="py-2 px-2 text-xs border-b border-[#1E40AF]/10 last:border-0 hover:bg-[#d9d9d9]/50">
+                    <div className="font-medium text-black/80 mb-1">{formatParameterName(threshold.parameter)}</div>
                     <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-gray-600">Min: <span className="font-semibold text-green-700">{threshold.minValue} {threshold.unit}</span></span>
-                      <span className="text-gray-600">Max: <span className="font-semibold text-red-700">{threshold.maxValue} {threshold.unit}</span></span>
+                      <span className="text-black/70">Min: <span className="font-semibold text-green-700">{threshold.minValue} {threshold.unit}</span></span>
+                      <span className="text-black/70">Max: <span className="font-semibold text-red-700">{threshold.maxValue} {threshold.unit}</span></span>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center text-gray-500 py-4">No thresholds configured</div>
+                <div className="text-center text-black/60 py-4">No thresholds configured</div>
               )}
             </div>
           </CollapsibleSection>
@@ -517,38 +517,38 @@ export default function DashboardPage() {
           {/* Column 1: RPM & Critical Status (2.5 cols) */}
           <div className="col-span-3 flex flex-col gap-3 min-h-0">
             {/* RPM Gauge */}
-            <div className="bg-white rounded-lg shadow-sm p-3 border border-gray-200">
-              <h3 className="text-sm font-semibold mb-2 text-gray-900">Engine Speed</h3>
+            <div className="bg-white rounded-lg shadow-sm p-3 border border-[#1E40AF]/20">
+              <h3 className="text-sm font-semibold mb-2 text-black">Engine Speed</h3>
               <canvas ref={canvasRef} width={180} height={180} className="mx-auto" />
             </div>
-            
+
             {/* Primary Metrics */}
             <div className="grid grid-cols-1 gap-2">
-              <MetricCard 
-                label="Total Power" 
-                value={totalGeneratorP} 
-                unit="kW" 
+              <MetricCard
+                label="Total Power"
+                value={totalGeneratorP}
+                unit="kW"
                 color="#3b82f6"
                 data={history.map(h => h.power)}
               />
-              <MetricCard 
-                label="Frequency" 
-                value={telemetry?.Generator_Frequency || 0} 
-                unit="Hz" 
+              <MetricCard
+                label="Frequency"
+                value={telemetry?.Generator_Frequency || 0}
+                unit="Hz"
                 color="#8b5cf6"
                 data={history.map(h => h.frequency)}
               />
-              <MetricCard 
-                label="Avg Voltage" 
-                value={telemetry ? ((telemetry.Generator_Voltage_L1_N || 0) + (telemetry.Generator_Voltage_L2_N || 0) + (telemetry.Generator_Voltage_L3_N || 0)) / 3 : 0} 
-                unit="V" 
+              <MetricCard
+                label="Avg Voltage"
+                value={telemetry ? ((telemetry.Generator_Voltage_L1_N || 0) + (telemetry.Generator_Voltage_L2_N || 0) + (telemetry.Generator_Voltage_L3_N || 0)) / 3 : 0}
+                unit="V"
                 color="#10b981"
                 data={history.map(h => h.voltage)}
               />
-              <MetricCard 
-                label="Power Factor" 
-                value={telemetry?.Generator_Power_Factor || 0} 
-                unit="" 
+              <MetricCard
+                label="Power Factor"
+                value={telemetry?.Generator_Power_Factor || 0}
+                unit=""
                 color="#f59e0b"
               />
             </div>
@@ -556,27 +556,27 @@ export default function DashboardPage() {
 
           {/* Column 2: Primary Metrics & Generator (4.5 cols) */}
           <div className="col-span-5 flex flex-col gap-3 min-h-0">
-            
+
             {/* Generator Parameters */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-3 py-2">
-                <h3 className="text-sm font-semibold text-white">Generator Parameters</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-[#1E40AF]/20 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="bg-[#1E40AF] px-3 py-2">
+                <h3 className="text-sm font-semibold text-[#d9d9d9]">Generator Parameters</h3>
               </div>
               <div className="grid grid-cols-3 gap-4 p-3 flex-1 overflow-y-auto">
                 <div>
-                  <div className="text-xs font-semibold text-gray-600 mb-2 pb-1 border-b">Active Power (kW)</div>
+                  <div className="text-xs font-semibold text-[#1E40AF] mb-2 pb-1 border-b">Active Power (kW)</div>
                   <DataRow label="L1" value={telemetry?.Generator_P_L1} unit="" />
                   <DataRow label="L2" value={telemetry?.Generator_P_L2} unit="" />
                   <DataRow label="L3" value={telemetry?.Generator_P_L3} unit="" />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-gray-600 mb-2 pb-1 border-b">Reactive Power (kVAr)</div>
+                  <div className="text-xs font-semibold text-[#1E40AF] mb-2 pb-1 border-b">Reactive Power (kVAr)</div>
                   <DataRow label="L1" value={telemetry?.Generator_Q_L1} unit="" />
                   <DataRow label="L2" value={telemetry?.Generator_Q_L2} unit="" />
                   <DataRow label="L3" value={telemetry?.Generator_Q_L3} unit="" />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-gray-600 mb-2 pb-1 border-b">Apparent Power (kVA)</div>
+                  <div className="text-xs font-semibold text-[#1E40AF] mb-2 pb-1 border-b">Apparent Power (kVA)</div>
                   <DataRow label="L1" value={telemetry?.Generator_S_L1} unit="" />
                   <DataRow label="L2" value={telemetry?.Generator_S_L2} unit="" />
                   <DataRow label="L3" value={telemetry?.Generator_S_L3} unit="" />
@@ -585,25 +585,25 @@ export default function DashboardPage() {
             </div>
 
             {/* Voltage & Current */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-3 py-2">
-                <h3 className="text-sm font-semibold text-white">Voltage & Current</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-[#1E40AF]/20 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="bg-[#1E40AF] px-3 py-2">
+                <h3 className="text-sm font-semibold text-[#d9d9d9]">Voltage & Current</h3>
               </div>
               <div className="grid grid-cols-3 gap-4 p-3 flex-1 overflow-y-auto">
                 <div>
-                  <div className="text-xs font-semibold text-gray-600 mb-2 pb-1 border-b">Phase-Neutral (V)</div>
+                  <div className="text-xs font-semibold text-[#1E40AF] mb-2 pb-1 border-b">Phase-Neutral (V)</div>
                   <DataRow label="L1-N" value={telemetry?.Generator_Voltage_L1_N} unit="" />
                   <DataRow label="L2-N" value={telemetry?.Generator_Voltage_L2_N} unit="" />
                   <DataRow label="L3-N" value={telemetry?.Generator_Voltage_L3_N} unit="" />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-gray-600 mb-2 pb-1 border-b">Phase-Phase (V)</div>
+                  <div className="text-xs font-semibold text-[#1E40AF] mb-2 pb-1 border-b">Phase-Phase (V)</div>
                   <DataRow label="L1-L2" value={telemetry?.Generator_Voltage_L1_L2} unit="" />
                   <DataRow label="L2-L3" value={telemetry?.Generator_Voltage_L2_L3} unit="" />
                   <DataRow label="L3-L1" value={telemetry?.Generator_Voltage_L3_L1} unit="" />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-gray-600 mb-2 pb-1 border-b">Current (A)</div>
+                  <div className="text-xs font-semibold text-[#1E40AF] mb-2 pb-1 border-b">Current (A)</div>
                   <DataRow label="L1" value={telemetry?.Generator_Current_L1} unit="" />
                   <DataRow label="L2" value={telemetry?.Generator_Current_L2} unit="" />
                   <DataRow label="L3" value={telemetry?.Generator_Current_L3} unit="" />
@@ -612,9 +612,9 @@ export default function DashboardPage() {
               </div>
             </div>
             {/* Critical Status */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-3 py-2">
-                <h3 className="text-sm font-semibold text-white">Critical Status</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-[#1E40AF]/20 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="bg-[#1E40AF] px-3 py-2">
+                <h3 className="text-sm font-semibold text-[#d9d9d9]">Critical Status</h3>
               </div>
               <div className="flex-1 overflow-y-auto">
                 <DataRow label="Battery Voltage" value={telemetry?.Battery_Volts} unit="V" />
@@ -629,21 +629,21 @@ export default function DashboardPage() {
           {/* Column 3: Mains & Load (4 cols) */}
           <div className="col-span-4 flex flex-col gap-3 min-h-0">
             {/* Mains/Bus */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-3 py-2">
-                <h3 className="text-sm font-semibold text-white">Mains/Bus Parameters</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-[#1E40AF]/20 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="bg-[#1E40AF] px-3 py-2">
+                <h3 className="text-sm font-semibold text-[#d9d9d9]">Mains/Bus Parameters</h3>
               </div>
               <div className="p-3 flex-1 overflow-y-auto">
                 <DataRow label="Frequency" value={telemetry?.Mains_Bus_Frequency} unit="Hz" />
-                <div className="text-xs font-semibold text-gray-600 mt-3 mb-2 pb-1 border-b">Voltage Phase-Neutral (V)</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mt-3 mb-2 pb-1 border-b">Voltage Phase-Neutral (V)</div>
                 <DataRow label="L1-N" value={telemetry?.Mains_Bus_Voltage_L1_N} unit="" />
                 <DataRow label="L2-N" value={telemetry?.Mains_Bus_Voltage_L2_N} unit="" />
                 <DataRow label="L3-N" value={telemetry?.Mains_Bus_Voltage_L3_N} unit="" />
-                <div className="text-xs font-semibold text-gray-600 mt-3 mb-2 pb-1 border-b">Voltage Phase-Phase (V)</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mt-3 mb-2 pb-1 border-b">Voltage Phase-Phase (V)</div>
                 <DataRow label="L1-L2" value={telemetry?.Mains_Bus_Voltage_L1_L2} unit="" />
                 <DataRow label="L2-L3" value={telemetry?.Mains_Bus_Voltage_L2_L3} unit="" />
                 <DataRow label="L3-L1" value={telemetry?.Mains_Bus_Voltage_L3_L1} unit="" />
-                <div className="text-xs font-semibold text-gray-600 mt-3 mb-2 pb-1 border-b">Import</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mt-3 mb-2 pb-1 border-b">Import</div>
                 <DataRow label="Current L1" value={telemetry?.Mains_L1_Current} unit="A" />
                 <DataRow label="Active Power" value={telemetry?.Mains_Import_P} unit="kW" />
                 <DataRow label="Reactive Power" value={telemetry?.Mains_Import_Q} unit="kVAr" />
@@ -652,16 +652,16 @@ export default function DashboardPage() {
             </div>
 
             {/* Load & Monitoring */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-3 py-2">
-                <h3 className="text-sm font-semibold text-white">Load & Protection</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-[#1E40AF]/20 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="bg-[#1E40AF] px-3 py-2">
+                <h3 className="text-sm font-semibold text-[#d9d9d9]">Load & Protection</h3>
               </div>
               <div className="p-3 flex-1 overflow-y-auto">
-                <div className="text-xs font-semibold text-gray-600 mb-2 pb-1 border-b">Load</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mb-2 pb-1 border-b">Load</div>
                 <DataRow label="Active Power" value={telemetry?.Load_P} unit="kW" />
                 <DataRow label="Reactive Power" value={telemetry?.Load_Q} unit="kVAr" />
                 <DataRow label="Power Factor" value={telemetry?.Load_PF} unit="" />
-                <div className="text-xs font-semibold text-gray-600 mt-3 mb-2 pb-1 border-b">Protection</div>
+                <div className="text-xs font-semibold text-[#1E40AF] mt-3 mb-2 pb-1 border-b">Protection</div>
                 <DataRow label="Max Vector Shift" value={telemetry?.Max_Vector_Shift} unit="°" />
                 <DataRow label="ROCOF" value={telemetry?.ROCOF} unit="Hz/s" />
                 <DataRow label="Max ROCOF" value={telemetry?.Max_ROCOF} unit="Hz/s" />
@@ -670,23 +670,23 @@ export default function DashboardPage() {
             </div>
 
             {/* Configured Thresholds */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-800 to-indigo-700 px-3 py-2">
-                <h3 className="text-sm font-semibold text-white">Configured Thresholds</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-[#1E40AF]/20 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="bg-[#1E40AF] px-3 py-2">
+                <h3 className="text-sm font-semibold text-[#d9d9d9]">Configured Thresholds</h3>
               </div>
               <div className="p-3 flex-1 overflow-y-auto">
                 {thresholds.length > 0 ? (
                   thresholds.map((threshold) => (
-                    <div key={threshold.id} className="py-2 px-2 text-xs border-b border-gray-100 last:border-0 hover:bg-gray-50 rounded">
-                      <div className="font-medium text-gray-700 mb-1.5">{formatParameterName(threshold.parameter)}</div>
+                    <div key={threshold.id} className="py-2 px-2 text-xs border-b border-[#1E40AF]/10 last:border-0 hover:bg-[#d9d9d9]/50 rounded">
+                      <div className="font-medium text-black/80 mb-1.5">{formatParameterName(threshold.parameter)}</div>
                       <div className="flex justify-between items-center text-[11px]">
-                        <span className="text-gray-600 bg-green-50 px-2 py-1 rounded">Min: <span className="font-semibold text-green-700">{threshold.minValue} {threshold.unit}</span></span>
-                        <span className="text-gray-600 bg-red-50 px-2 py-1 rounded">Max: <span className="font-semibold text-red-700">{threshold.maxValue} {threshold.unit}</span></span>
+                        <span className="text-black/70 bg-green-50 px-2 py-1 rounded">Min: <span className="font-semibold text-green-700">{threshold.minValue} {threshold.unit}</span></span>
+                        <span className="text-black/70 bg-red-50 px-2 py-1 rounded">Max: <span className="font-semibold text-red-700">{threshold.maxValue} {threshold.unit}</span></span>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center text-gray-500 py-4 text-xs">No thresholds configured</div>
+                  <div className="text-center text-black/60 py-4 text-xs">No thresholds configured</div>
                 )}
               </div>
             </div>
