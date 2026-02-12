@@ -34,6 +34,8 @@ public class CorsFilterConfig extends OncePerRequestFilter {
             response.setHeader("Access-Control-Expose-Headers", "Set-Cookie, Authorization");
             response.setHeader("Access-Control-Allow-Credentials", "true");
             response.setHeader("Access-Control-Max-Age", "3600");
+            // Set Referrer-Policy to allow cross-origin requests
+            response.setHeader("Referrer-Policy", "no-referrer");
         }
         
         // Handle OPTIONS preflight requests
